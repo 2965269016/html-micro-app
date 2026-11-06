@@ -72,7 +72,7 @@ class MainActivity : Activity() {
                     else -> "application/octet-stream"
                 }
                 WebResourceResponse(mime, null, file.inputStream())
-            }
+            })
             .build()
 
         webView.webViewClient = object : WebViewClient() {
