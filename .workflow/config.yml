@@ -1,11 +1,11 @@
 # =============================================================================
 #  HTML 微应用容器 · Gitee Go 云打包流水线
-#  文档: https://help.gitee.com （Gitee Go / 流水线）
+#  文档: https://gitee.com/help/articles/4356
 #
-#  触发条件：push 到 main / master 分支，或在 Gitee 页面手动触发
+#  触发条件：push 到 main / master 分支
 #  产物：    app-debug.apk 自动上传到 Gitee Release
 #
-#  ⚠️ 需要配置的全局变量（在 Gitee 仓库 → 流水线 → 设置 → 全局变量 中添加）：
+#  ⚠️ 需要配置的全局变量（仓库 → 流水线 → 设置 → 全局变量）：
 #     名称: CI_TOKEN
 #     值:   你的 Gitee 私人令牌（需勾选 projects 权限）
 #     获取: https://gitee.com/profile/personal_access_tokens
@@ -23,7 +23,6 @@ triggers:
         - main
         - master
 
-# global: 声明后可在 Gitee 页面的「全局变量」里注入，避免把令牌写进仓库
 variables:
   global:
     - CI_TOKEN
@@ -35,27 +34,22 @@ stages:
     trigger: auto
     executor: []
     steps:
-      # 说明：步骤类型 execute@shell。
-      # 若你的 Gitee Go 版本报「找不到步骤」或参数不识别，
-      # 请把 inputs: / script: 换成下面两种等价写法之一：
-      #   A) script: |            （旧版）
-      #   B) commands:            （与 build@gradle 一致的列表写法）
-      - step: execute@shell
-        name: build_apk
-        displayName: '安装工具链 → 构建 → 发布 Release'
-        inputs:
-          script: |
-            set -o pipefail
-            bash ci/build_and_publish.sh
-        # 把 APK 也存成流水线制品，Release 发布失败时仍可从这里下载
+      # ── 单步完成：装工具链 → Gradle 构建 → 发布 Release ─────────────────
+      # 使用 run@shell 在 Ubuntu 22.04 容器中执行
+      # ci/build_and_publish.sh 内部自行处理 JDK / Android SDK / Gradle / 构建 / 发布
+      - step: run@shell
+        name: build_and_publish
+        displayName: '构建并发布 APK'
+        image: ubuntu:22.04
+        commands:
+          - apt-get update -qq
+          - apt-get install -y -qq curl unzip zip git
+          - bash ci/build_and_publish.sh
+        # 把 APK 也存为流水线制品，Release 发布失败时仍可从这里下载
         artifacts:
           - name: APK_ARTIFACT
             path:
               - app/build/outputs/apk/debug/app-debug.apk
-        # 缓存 Gradle 依赖，二次构建提速
-        caches:
-          - /root/.gradle/caches
-          - /home/runner/.gradle/caches
         strategy:
           retry: '0'
-          stepTimeout: 60
+          stepTimeout: 90
