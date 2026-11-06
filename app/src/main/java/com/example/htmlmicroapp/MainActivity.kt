@@ -48,11 +48,11 @@ class MainActivity : Activity() {
         webView.settings.allowFileAccess = true
         webView.settings.allowContentAccess = true
 
-        val assetLoader = WebViewAssetLoader.Builder(this)
-            .addPathHandler("/") { path ->
-                val dir = extractedAppDir ?: return@addPathHandler null
+        val assetLoader = WebViewAssetLoader.Builder()
+            .addPathHandler("/", WebViewAssetLoader.PathHandler { path ->
+                val dir = extractedAppDir ?: return@PathHandler null
                 val file = File(dir, path)
-                if (!file.exists() || !file.isFile) return@addPathHandler null
+                if (!file.exists() || !file.isFile) return@PathHandler null
 
                 val mime = when (file.extension.lowercase()) {
                     "html", "htm" -> "text/html"
@@ -150,7 +150,7 @@ class MainActivity : Activity() {
         val prefs = getSharedPreferences(PREFS, MODE_PRIVATE)
         if (prefs.getBoolean(KEY_SHORTCUT_DONE, false)) return
 
-        val shortcutManager = getSystemService<android.app.ShortcutManager>()
+        val shortcutManager = getSystemService<android.content.pm.ShortcutManager>()
         if (shortcutManager == null || !shortcutManager.isRequestPinShortcutSupported) {
             // 桌面不支持时也标记完成，不再重复尝试
             prefs.edit().putBoolean(KEY_SHORTCUT_DONE, true).apply()
