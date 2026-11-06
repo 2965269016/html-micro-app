@@ -1,17 +1,15 @@
-name: Build and Release (备选流水线)
-
-# 说明：这是备选方案。主流水线是 Gitee Go（见 .workflow/config.yml）。
-# 仅当你把仓库同时推送到 GitHub 时才会触发。
+name: Build APK
 
 on:
   push:
-    branches: [main]
+    branches: [main, master]
     tags: ['v*']
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       contents: write
 
@@ -30,20 +28,7 @@ jobs:
         with:
           gradle-version: '8.4'
 
-      - name: Install Android SDK
-        run: |
-          set -e
-          export ANDROID_HOME=$HOME/android-sdk
-          mkdir -p "$ANDROID_HOME/cmdline-tools"
-          curl -fsSL -o /tmp/cmdtools.zip \
-            "https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip"
-          unzip -q /tmp/cmdtools.zip -d "$ANDROID_HOME/cmdline-tools"
-          mv "$ANDROID_HOME/cmdline-tools/cmdline-tools" "$ANDROID_HOME/cmdline-tools/latest"
-          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
-          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" \
-            "platform-tools" "platforms;android-34" "build-tools;34.0.0" > /dev/null
-          echo "sdk.dir=$ANDROID_HOME" > local.properties
-
+      # ubuntu-latest 自带 Android SDK 且已接受许可，无需手动安装
       - name: Build debug APK
         run: gradle assembleDebug --no-daemon --console=plain
 
@@ -53,12 +38,27 @@ jobs:
           name: app-debug
           path: app/build/outputs/apk/debug/*.apk
 
-      - name: Create Release
+      - name: Create Release (push to main)
         if: github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: build-${{ github.run_number }}
           name: 自动构建 #${{ github.run_number }}
+          body: |
+            由 GitHub Actions 自动构建于 ${{ github.event.head_commit.timestamp }}
+
+            提交: ${{ github.event.head_commit.message }}
+
+            手机浏览器打开本页，下载 app-debug.apk 安装即可。
           files: app/build/outputs/apk/debug/app-debug.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create Release (tag push)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: app/build/outputs/apk/debug/app-debug.apk
+          generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
