@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>HTML 微应用容器</title>
+  <style>
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body {
+      margin: 0; padding: 0;
+      font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: linear-gradient(160deg, #4A6CF7 0%, #6B4EF7 55%, #00C6A7 100%);
+      min-height: 100vh; color: #fff;
+    }
+    header { padding: 28px 20px 16px; text-align: center; }
+    header h1 { margin: 0; font-size: 22px; font-weight: 600; letter-spacing: 1px; }
+    header p { margin: 8px 0 0; font-size: 13px; opacity: .82; }
+    main { padding: 8px 16px 40px; max-width: 520px; margin: 0 auto; }
+    .card {
+      background: rgba(255,255,255,.14);
+      border: 1px solid rgba(255,255,255,.22);
+      border-radius: 16px; padding: 16px; margin-bottom: 14px;
+      backdrop-filter: blur(6px);
+    }
+    .card h2 { margin: 0 0 12px; font-size: 15px; font-weight: 600; opacity: .95; }
+    .row { display: flex; gap: 8px; }
+    input[type=text] {
+      flex: 1; border: 0; border-radius: 10px; padding: 12px 14px;
+      font-size: 15px; background: rgba(255,255,255,.9); color: #222; outline: none;
+    }
+    button {
+      border: 0; border-radius: 10px; padding: 12px 16px; font-size: 15px;
+      background: #fff; color: #4A6CF7; font-weight: 600; cursor: pointer;
+    }
+    button:active { transform: scale(.97); }
+    ul { list-style: none; margin: 12px 0 0; padding: 0; }
+    li {
+      display: flex; align-items: center; gap: 10px;
+      background: rgba(255,255,255,.12); border-radius: 10px;
+      padding: 12px; margin-bottom: 8px; font-size: 15px;
+    }
+    li.done span { text-decoration: line-through; opacity: .55; }
+    li span { flex: 1; word-break: break-all; }
+    li .del { background: rgba(255,255,255,.2); color: #fff; padding: 6px 10px; font-size: 13px; }
+    .empty { text-align: center; font-size: 13px; opacity: .7; padding: 14px 0 4px; }
+    .status { font-size: 12px; opacity: .8; margin-top: 10px; text-align: center; min-height: 16px; }
+    code { background: rgba(0,0,0,.22); padding: 2px 6px; border-radius: 5px; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>✅ 容器运行成功</h1>
+    <p>这是一个示例应用 —— 换成你自己的 HTML 即可</p>
+  </header>
+
+  <main>
+    <div class="card">
+      <h2>📝 本地待办（数据存在手机本地）</h2>
+      <div class="row">
+        <input id="inp" type="text" placeholder="输入一件事，回车添加" autocomplete="off">
+        <button id="add">添加</button>
+      </div>
+      <ul id="list"></ul>
+      <div class="empty" id="empty">暂无内容，添加一条试试</div>
+      <div class="status" id="status"></div>
+    </div>
+
+    <div class="card">
+      <h2>🔌 本地存储接口</h2>
+      <div class="status" style="text-align:left;margin:0;line-height:1.9">
+        <code>LocalStore.save(key, value)</code> 保存<br>
+        <code>LocalStore.load(key)</code> 读取<br>
+        <code>LocalStore.remove(key)</code> 删除<br>
+        <code>LocalStore.clear()</code> 清空
+      </div>
+      <div class="row" style="margin-top:12px">
+        <button id="clear" style="background:rgba(255,255,255,.2);color:#fff">清空全部数据</button>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    var KEY = 'demo_todos';
+    var list = document.getElementById('list');
+    var inp = document.getElementById('inp');
+    var statusEl = document.getElementById('status');
+    var emptyEl = document.getElementById('empty');
+    var todos = [];
+
+    function load() {
+      try {
+        var r = JSON.parse(LocalStore.load(KEY));
+        todos = (r && r.value) ? JSON.parse(r.value) : [];
+      } catch (e) { todos = []; }
+      render();
+    }
+    function save() {
+      LocalStore.save(KEY, JSON.stringify(todos));
+      flash('已保存到本地');
+    }
+    function flash(msg) {
+      statusEl.textContent = msg;
+      clearTimeout(flash._t);
+      flash._t = setTimeout(function () { statusEl.textContent = ''; }, 1600);
+    }
+    function render() {
+      list.innerHTML = '';
+      emptyEl.style.display = todos.length ? 'none' : 'block';
+      todos.forEach(function (t, i) {
+        var li = document.createElement('li');
+        if (t.done) li.className = 'done';
+        var cb = document.createElement('input');
+        cb.type = 'checkbox'; cb.checked = !!t.done;
+        cb.onchange = function () { todos[i].done = cb.checked; save(); render(); };
+        var sp = document.createElement('span');
+        sp.textContent = t.text;
+        var del = document.createElement('button');
+        del.className = 'del'; del.textContent = '删除';
+        del.onclick = function () { todos.splice(i, 1); save(); render(); };
+        li.appendChild(cb); li.appendChild(sp); li.appendChild(del);
+        list.appendChild(li);
+      });
+    }
+    function add() {
+      var v = inp.value.trim();
+      if (!v) return;
+      todos.unshift({ text: v, done: false });
+      inp.value = '';
+      save(); render();
+    }
+
+    document.getElementById('add').onclick = add;
+    inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') add(); });
+    document.getElementById('clear').onclick = function () {
+      LocalStore.clear(); todos = []; save(); render(); flash('已清空');
+    };
+
+    load();
+  </script>
+</body>
+</html>
