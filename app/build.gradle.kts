@@ -11,8 +11,8 @@ android {
         applicationId = "com.example.htmlmicroapp"
         minSdk = 24
         targetSdk = 34
-        versionCode = 2
-        versionName = "0.1.0"
+        versionCode = 3
+        versionName = "0.1.1"
     }
 
     buildTypes {

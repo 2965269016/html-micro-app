@@ -198,6 +198,8 @@ class RunActivity : AppCompatActivity() {
         /** 供桌面快捷方式 / 盒子列表构造启动 Intent。 */
         fun intentFor(activity: Context, appId: String, appName: String): Intent =
             Intent(activity, RunActivity::class.java).apply {
+                // 快捷方式 intent 必须带 action，否则部分桌面会抛 IllegalArgumentException
+                action = Intent.ACTION_VIEW
                 putExtra(EXTRA_APP_ID, appId)
                 putExtra(EXTRA_APP_NAME, appName)
             }

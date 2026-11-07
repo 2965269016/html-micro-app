@@ -257,21 +257,30 @@ class HomeActivity : AppCompatActivity() {
             Snackbar.make(rootView, "系统版本过低，不支持固定快捷方式", Snackbar.LENGTH_SHORT).show()
             return
         }
-        val sm = getSystemService(android.content.pm.ShortcutManager::class.java)
-        if (sm == null || !sm.isRequestPinShortcutSupported) {
-            Snackbar.make(rootView, "当前桌面不支持固定快捷方式", Snackbar.LENGTH_SHORT).show()
-            return
+        try {
+            val sm = getSystemService(android.content.pm.ShortcutManager::class.java)
+            if (sm == null || !sm.isRequestPinShortcutSupported) {
+                Snackbar.make(rootView, "当前桌面不支持固定快捷方式", Snackbar.LENGTH_SHORT).show()
+                return
+            }
+            val icon = android.graphics.drawable.Icon.createWithBitmap(
+                IconGenerator.generate(this, app.name)
+            )
+            val shortcut = android.content.pm.ShortcutInfo.Builder(this, "mini_${app.id}")
+                .setShortLabel(app.name)
+                .setLongLabel(app.name)
+                .setIcon(icon)
+                .setIntent(RunActivity.intentFor(this, app.id, app.name))
+                .build()
+            sm.requestPinShortcut(shortcut, null)
+        } catch (e: Exception) {
+            // 部分定制桌面（MIUI 等）会抛异常，兜底提示而不是闪退
+            Snackbar.make(
+                rootView,
+                "添加失败：${e.message ?: "桌面不支持"}（可尝试长按应用图标）",
+                Snackbar.LENGTH_LONG
+            ).show()
         }
-        val icon = android.graphics.drawable.Icon.createWithBitmap(
-            IconGenerator.generate(this, app.name)
-        )
-        val shortcut = android.content.pm.ShortcutInfo.Builder(this, "mini_${app.id}")
-            .setShortLabel(app.name)
-            .setLongLabel(app.name)
-            .setIcon(icon)
-            .setIntent(RunActivity.intentFor(this, app.id, app.name))
-            .build()
-        sm.requestPinShortcut(shortcut, null)
     }
 
     private fun confirmDelete(app: AppRepo.MiniApp) {

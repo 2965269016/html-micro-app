@@ -2,6 +2,14 @@
 
 所有显著变更记录在本文件。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)。
 
+## [0.1.1] - 2026-11-07
+
+### 修复
+
+- **「添加到桌面」闪退**：快捷方式 Intent 补上 `ACTION_VIEW`（缺失 action 时部分桌面 /
+  ShortcutService 校验抛异常导致闪退）；同时为 `requestPinShortcut` 增加异常兜底，
+  在不支持的定制桌面（MIUI 等）上改为 Snackbar 提示而不是崩溃
+
 ## [0.1.0] - 2026-11-07
 
 第一个正式版本：从「单应用 WebView 壳」改造为「小程序盒子」。
