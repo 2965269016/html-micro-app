@@ -12,10 +12,10 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.widget.ImageButton
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.webkit.WebViewAssetLoader
-import com.google.android.material.appbar.MaterialToolbar
 import java.io.File
 
 /**
@@ -45,11 +45,10 @@ class RunActivity : AppCompatActivity() {
         }
         val id = appId!!
 
-        val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
-        val appName = intent.getStringExtra(EXTRA_APP_NAME)
-            ?: AppRepo.loadMeta(this, id)?.name ?: "小程序"
-        toolbar.title = appName
-        toolbar.setNavigationOnClickListener { finish() }
+        // 悬浮返回键：网页有历史则后退，否则退出小程序
+        findViewById<ImageButton>(R.id.btn_back).setOnClickListener {
+            if (this::webView.isInitialized && webView.canGoBack()) webView.goBack() else finish()
+        }
 
         webView = findViewById(R.id.webview)
         setupWebView(id)

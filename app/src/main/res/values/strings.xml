@@ -9,4 +9,5 @@
     <string name="perm_vibrate">振动</string>
     <string name="perm_clipboard">剪贴板</string>
     <string name="perm_geolocation">定位</string>
+    <string name="back">返回</string>
 </resources>
