@@ -3,62 +3,82 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>HTML 微应用容器</title>
+  <title>小程序盒子 · 内置示例</title>
   <style>
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     body {
       margin: 0; padding: 0;
       font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
-      background: linear-gradient(160deg, #4A6CF7 0%, #6B4EF7 55%, #00C6A7 100%);
-      min-height: 100vh; color: #fff;
+      background: #f3f5fb; color: #1c1e29;
     }
-    header { padding: 28px 20px 16px; text-align: center; }
-    header h1 { margin: 0; font-size: 22px; font-weight: 600; letter-spacing: 1px; }
-    header p { margin: 8px 0 0; font-size: 13px; opacity: .82; }
-    main { padding: 8px 16px 40px; max-width: 520px; margin: 0 auto; }
+    header {
+      padding: 28px 20px 20px;
+      background: linear-gradient(160deg, #4A6CF7 0%, #6B4EF7 100%);
+      color: #fff; text-align: center;
+    }
+    header h1 { margin: 0; font-size: 21px; font-weight: 600; }
+    header p { margin: 8px 0 0; font-size: 13px; opacity: .85; }
+    main { padding: 16px 14px 44px; max-width: 520px; margin: 0 auto; }
     .card {
-      background: rgba(255,255,255,.14);
-      border: 1px solid rgba(255,255,255,.22);
-      border-radius: 16px; padding: 16px; margin-bottom: 14px;
-      backdrop-filter: blur(6px);
+      background: #fff; border-radius: 16px; padding: 16px;
+      margin-bottom: 14px; box-shadow: 0 1px 4px rgba(28,30,41,.06);
     }
-    .card h2 { margin: 0 0 12px; font-size: 15px; font-weight: 600; opacity: .95; }
+    .card h2 { margin: 0 0 12px; font-size: 15px; font-weight: 600; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    button {
+      border: 0; border-radius: 12px; padding: 13px 10px; font-size: 14px;
+      background: #eef1fe; color: #4A6CF7; font-weight: 600; cursor: pointer;
+    }
+    button:active { transform: scale(.97); }
     .row { display: flex; gap: 8px; }
     input[type=text] {
       flex: 1; border: 0; border-radius: 10px; padding: 12px 14px;
-      font-size: 15px; background: rgba(255,255,255,.9); color: #222; outline: none;
+      font-size: 15px; background: #f3f5fb; color: #222; outline: none;
     }
-    button {
-      border: 0; border-radius: 10px; padding: 12px 16px; font-size: 15px;
-      background: #fff; color: #4A6CF7; font-weight: 600; cursor: pointer;
-    }
-    button:active { transform: scale(.97); }
     ul { list-style: none; margin: 12px 0 0; padding: 0; }
     li {
       display: flex; align-items: center; gap: 10px;
-      background: rgba(255,255,255,.12); border-radius: 10px;
+      background: #f3f5fb; border-radius: 10px;
       padding: 12px; margin-bottom: 8px; font-size: 15px;
     }
-    li.done span { text-decoration: line-through; opacity: .55; }
+    li.done span { text-decoration: line-through; opacity: .5; }
     li span { flex: 1; word-break: break-all; }
-    li .del { background: rgba(255,255,255,.2); color: #fff; padding: 6px 10px; font-size: 13px; }
-    .empty { text-align: center; font-size: 13px; opacity: .7; padding: 14px 0 4px; }
-    .status { font-size: 12px; opacity: .8; margin-top: 10px; text-align: center; min-height: 16px; }
-    code { background: rgba(0,0,0,.22); padding: 2px 6px; border-radius: 5px; font-size: 12px; }
+    li .del { background: #ffe9e9; color: #e5484d; padding: 6px 10px; font-size: 13px; border-radius: 8px; }
+    .empty { text-align: center; font-size: 13px; opacity: .5; padding: 12px 0 2px; }
+    .status { font-size: 12px; color: #4A6CF7; margin-top: 10px; text-align: center; min-height: 16px; word-break: break-all; }
+    code { background: #f3f5fb; padding: 2px 6px; border-radius: 5px; font-size: 12px; }
+    .hint { font-size: 12px; opacity: .55; line-height: 1.8; margin-top: 10px; }
   </style>
 </head>
 <body>
   <header>
-    <h1>✅ 容器运行成功</h1>
-    <p>这是一个示例应用 —— 换成你自己的 HTML 即可</p>
+    <h1>✅ 小程序盒子运行成功</h1>
+    <p>这是一个示例小程序 —— 点右下角「导入」换成你自己的包</p>
   </header>
 
   <main>
     <div class="card">
-      <h2>📝 本地待办（数据存在手机本地）</h2>
+      <h2>⚡ 系统能力演示（Native API）</h2>
+      <div class="grid">
+        <button onclick="apiNotify()">🔔 发通知</button>
+        <button onclick="apiVibrate()">📳 振动</button>
+        <button onclick="apiCopy()">📋 复制文字</button>
+        <button onclick="apiPaste()">📥 粘贴文字</button>
+        <button onclick="apiShare()">🔗 分享</button>
+        <button onclick="apiDevice()">📱 设备信息</button>
+      </div>
+      <div class="status" id="apiStatus"></div>
+      <div class="hint">
+        长按首页卡片 →「权限管理」可开关通知/振动/剪贴板/定位。<br>
+        未开启权限时调用会返回 <code>permission_denied</code>。
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>📝 本地存储（Native.save / load）</h2>
       <div class="row">
         <input id="inp" type="text" placeholder="输入一件事，回车添加" autocomplete="off">
-        <button id="add">添加</button>
+        <button id="add" style="width:auto">添加</button>
       </div>
       <ul id="list"></ul>
       <div class="empty" id="empty">暂无内容，添加一条试试</div>
@@ -66,16 +86,13 @@
     </div>
 
     <div class="card">
-      <h2>🔌 本地存储接口</h2>
-      <div class="status" style="text-align:left;margin:0;line-height:1.9">
-        <code>LocalStore.save(key, value)</code> 保存<br>
-        <code>LocalStore.load(key)</code> 读取<br>
-        <code>LocalStore.remove(key)</code> 删除<br>
-        <code>LocalStore.clear()</code> 清空
+      <h2>🔌 存储接口</h2>
+      <div class="hint" style="margin:0">
+        <code>Native.save(key, value)</code> 保存（兼容别名 LocalStore.save）<br>
+        <code>Native.load(key)</code> 读取 · <code>Native.keys()</code> 键列表<br>
+        <code>Native.remove(key)</code> 删除 · <code>Native.clear()</code> 清空
       </div>
-      <div class="row" style="margin-top:12px">
-        <button id="clear" style="background:rgba(255,255,255,.2);color:#fff">清空全部数据</button>
-      </div>
+      <button style="margin-top:12px;background:#ffe9e9;color:#e5484d" onclick="apiClearAll()">清空全部数据</button>
     </div>
   </main>
 
@@ -84,24 +101,61 @@
     var list = document.getElementById('list');
     var inp = document.getElementById('inp');
     var statusEl = document.getElementById('status');
+    var apiStatus = document.getElementById('apiStatus');
     var emptyEl = document.getElementById('empty');
     var todos = [];
 
+    function show(msg) {
+      apiStatus.textContent = msg;
+      clearTimeout(show._t);
+      show._t = setTimeout(function(){ apiStatus.textContent = ''; }, 2600);
+    }
+    function parse(r) { try { return JSON.parse(r); } catch (e) { return { ok:false, error:'bad_json' }; } }
+
+    /* ---------- 系统能力 ---------- */
+    function apiNotify() {
+      var r = parse(Native.notify('来自小程序的通知', '恭喜，通知能力已打通！'));
+      show(r.ok ? '已发送通知，下拉状态栏查看' : '失败：' + r.error + '（长按首页卡片开启权限）');
+    }
+    function apiVibrate() {
+      var r = parse(Native.vibrate(300));
+      show(r.ok ? '已振动 300ms' : '失败：' + r.error);
+    }
+    function apiCopy() {
+      var r = parse(Native.copyText('小程序盒子复制测试 @' + new Date().toLocaleTimeString()));
+      show(r.ok ? '已复制到剪贴板' : '失败：' + r.error);
+    }
+    function apiPaste() {
+      var r = parse(Native.pasteText());
+      show(r.ok ? ('剪贴板内容：' + (r.text || '(空)')) : '失败：' + r.error);
+    }
+    function apiShare() {
+      var r = parse(Native.share('小程序盒子', '我的 HTML 小程序跑起来啦！'));
+      if (!r.ok) show('失败：' + r.error);
+    }
+    function apiDevice() {
+      var r = parse(Native.deviceInfo());
+      if (r.ok) show(r.brand + ' ' + r.model + ' · ' + r.osVersion + ' · 屏幕 ' + r.screen);
+      else show('失败：' + r.error);
+    }
+    function apiClearAll() {
+      Native.clear(); todos = []; save(false); render(); show('已清空');
+    }
+
+    /* ---------- 待办（本地存储） ---------- */
     function load() {
-      try {
-        var r = JSON.parse(LocalStore.load(KEY));
-        todos = (r && r.value) ? JSON.parse(r.value) : [];
-      } catch (e) { todos = []; }
+      var r = parse(Native.load(KEY));
+      todos = (r.ok && r.value) ? JSON.parse(r.value) : [];
       render();
     }
-    function save() {
-      LocalStore.save(KEY, JSON.stringify(todos));
-      flash('已保存到本地');
+    function save(flash) {
+      Native.save(KEY, JSON.stringify(todos));
+      if (flash !== false) flashStatus('已保存到本地');
     }
-    function flash(msg) {
+    function flashStatus(msg) {
       statusEl.textContent = msg;
-      clearTimeout(flash._t);
-      flash._t = setTimeout(function () { statusEl.textContent = ''; }, 1600);
+      clearTimeout(flashStatus._t);
+      flashStatus._t = setTimeout(function(){ statusEl.textContent=''; }, 1500);
     }
     function render() {
       list.innerHTML = '';
@@ -111,12 +165,12 @@
         if (t.done) li.className = 'done';
         var cb = document.createElement('input');
         cb.type = 'checkbox'; cb.checked = !!t.done;
-        cb.onchange = function () { todos[i].done = cb.checked; save(); render(); };
+        cb.onchange = function(){ todos[i].done = cb.checked; save(); render(); };
         var sp = document.createElement('span');
         sp.textContent = t.text;
         var del = document.createElement('button');
         del.className = 'del'; del.textContent = '删除';
-        del.onclick = function () { todos.splice(i, 1); save(); render(); };
+        del.onclick = function(){ todos.splice(i,1); save(); render(); };
         li.appendChild(cb); li.appendChild(sp); li.appendChild(del);
         list.appendChild(li);
       });
@@ -128,13 +182,8 @@
       inp.value = '';
       save(); render();
     }
-
     document.getElementById('add').onclick = add;
-    inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') add(); });
-    document.getElementById('clear').onclick = function () {
-      LocalStore.clear(); todos = []; save(); render(); flash('已清空');
-    };
-
+    inp.addEventListener('keydown', function(e){ if (e.key === 'Enter') add(); });
     load();
   </script>
 </body>

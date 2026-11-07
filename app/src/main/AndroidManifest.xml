@@ -2,11 +2,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.htmlmicroapp">
 
-    <!-- Shortcut installation permission for API <= 25 -->
-    <uses-permission
-        android:name="com.android.launcher.permission.INSTALL_SHORTCUT"
-        android:maxSdkVersion="25" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <!-- 振动（普通权限） -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <!-- Android 13+ 通知运行时权限 -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- 小程序申请定位权限时，宿主需要持有对应系统权限 -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
     <application
         android:allowBackup="true"
@@ -16,25 +18,20 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.HtmlMicroApp">
 
+        <!-- 盒子首页：纯原生 M3 外壳 -->
         <activity
-            android:name=".MainActivity"
-            android:exported="true"
-            android:theme="@style/Theme.HtmlMicroApp.NoActionBar">
+            android:name=".HomeActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <provider
-            android:name="androidx.core.content.FileProvider"
-            android:authorities="${applicationId}.fileprovider"
-            android:exported="false"
-            android:grantUriPermissions="true">
-            <meta-data
-                android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths" />
-        </provider>
+        <!-- 小程序运行时：供桌面快捷方式直达（代码里做空参防御） -->
+        <activity
+            android:name=".RunActivity"
+            android:exported="true" />
 
     </application>
 

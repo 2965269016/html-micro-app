@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">HTML 微应用容器</string>
-    <string name="shortcut_label">打开 HTML 微应用</string>
+    <string name="app_name">小程序盒子</string>
+    <string name="import_app">导入 HTML 包</string>
+    <string name="load_demo">载入内置示例</string>
+    <string name="empty_hint">还没有小程序\n点右下角导入一个 zip 包，或先试试内置示例</string>
+    <string name="perm_dialog_hint">这些权限仅授予当前小程序，随时可以关闭。</string>
+    <string name="perm_notification">通知</string>
+    <string name="perm_vibrate">振动</string>
+    <string name="perm_clipboard">剪贴板</string>
+    <string name="perm_geolocation">定位</string>
 </resources>
