@@ -232,7 +232,7 @@ class SyncEngine(
             val b = input.read()
             if (b <= 0) return if (sb.isEmpty()) null else sb.toString()
             if (b == '\n'.code) {
-                if (sb.isNotEmpty() && sb.last() == '\r'.code) sb.setLength(sb.length - 1)
+                if (sb.isNotEmpty() && sb.last() == '\r') sb.setLength(sb.length - 1)
                 return sb.toString()
             }
             sb.append(b.toChar())
