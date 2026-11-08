@@ -9,6 +9,11 @@
     <!-- 小程序申请定位权限时，宿主需要持有对应系统权限 -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <!-- URL 导入（GitHub/Gitee）+ 设备同步 + 小程序联网（WebView 外链） -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- 局域网设备发现需要接收组播/广播 -->
+    <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
 
     <application
         android:allowBackup="true"
@@ -32,6 +37,11 @@
         <activity
             android:name=".RunActivity"
             android:exported="true" />
+
+        <!-- 设备同步页：监听仅在本页存活期间运行 -->
+        <activity
+            android:name=".SyncActivity"
+            android:exported="false" />
 
     </application>
 

@@ -110,7 +110,7 @@ object AppRepo {
         }
     }
 
-    private fun unzip(zipFile: File, destDir: File) {
+    internal fun unzip(zipFile: File, destDir: File) {
         destDir.mkdirs()
         try {
             ZipInputStream(zipFile.inputStream().buffered()).use { zis ->
@@ -240,6 +240,96 @@ object AppRepo {
             json.keys().forEach { k -> editor.putString(k, json.optString(k)) }
             editor.commit()
         } catch (_: Exception) { /* 数据损坏时忽略，不影响小程序本身 */ }
+    }
+
+    /** 把一个已解压的目录导入为小程序（URL 导入的多应用仓库用）。 */
+    fun importDirectory(context: Context, srcDir: File, fallbackName: String): MiniApp {
+        val stage = File(context.cacheDir, "dirimport_${System.currentTimeMillis()}")
+        try {
+            srcDir.copyRecursively(stage, overwrite = true)
+            normalizeRoot(stage)
+            if (!File(stage, "index.html").isFile) throw ImportException("目录缺少 index.html")
+            val id = "app_" + SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
+            val dest = appDir(context, id)
+            if (dest.exists()) dest.deleteRecursively()
+            if (!stage.renameTo(dest)) stage.copyRecursively(dest, overwrite = true)
+            restoreStore(context, id, File(dest, "$DATA_DIR/store.json"))
+            val name = readManifestName(File(dest, "manifest.json"))
+                ?: fallbackName.removeSuffix(".zip").removeSuffix(".ZIP").ifBlank { "未命名小程序" }
+            val meta = MiniApp(id, name, System.currentTimeMillis())
+            saveMeta(context, meta)
+            return meta
+        } finally {
+            stage.deleteRecursively()
+        }
+    }
+
+    // ------------------------------------------------------------------ 同步（协议 9.3 / 9.4）
+
+    /**
+     * 同步安装：沿用发送端的 expectedId（与普通导入不同）。
+     * id 已存在则替换 HTML 目录；store 与 meta 采用包内数据。
+     */
+    fun installSynced(context: Context, zipFile: File, expectedId: String): MiniApp {
+        val stage = File(context.cacheDir, "sync_" + System.currentTimeMillis())
+        try {
+            unzip(zipFile, stage)
+            normalizeRoot(stage)
+            if (!File(stage, "index.html").isFile) throw ImportException("同步包内缺少 index.html")
+
+            val dest = appDir(context, expectedId)
+            dest.parentFile?.mkdirs()
+            if (dest.exists()) dest.deleteRecursively()
+            if (!stage.renameTo(dest)) stage.copyRecursively(dest, overwrite = true)
+
+            // meta：优先包内 __meta__/meta.json（含权限开关）
+            val metaSrc = File(dest, "$META_DIR/meta.json")
+            val app: MiniApp = if (metaSrc.isFile) {
+                try {
+                    val json = JSONObject(metaSrc.readText())
+                    MiniApp(
+                        id = expectedId,
+                        name = json.optString("name").ifBlank { expectedId },
+                        installedAt = json.optLong("installedAt", 0L)
+                    )
+                } catch (_: Exception) {
+                    MiniApp(expectedId, expectedId, 0L)
+                }
+            } else {
+                MiniApp(expectedId, readManifestName(File(dest, "manifest.json")) ?: expectedId, 0L)
+            }
+            saveMeta(context, app.copy(installedAt = if (app.installedAt > 0) app.installedAt else System.currentTimeMillis()))
+
+            // store 采用包内数据（同步 = 完整采纳发送端数据）
+            clearData(context, expectedId)
+            restoreStore(context, expectedId, File(dest, "$DATA_DIR/store.json"))
+            return app
+        } finally {
+            stage.deleteRecursively()
+        }
+    }
+
+    /**
+     * JS 存储指纹（协议 9.4）：键按 UTF-8 字节序排序后拼 "key\tvalue\n"，
+     * SHA-256 取前 16 字节 hex。与电脑端 C# 实现逐字节一致。
+     */
+    fun storeHash(context: Context, id: String): String {
+        val prefs = storePrefs(context, id)
+        val sorted = prefs.all.keys.sortedWith { a, b ->
+            val ba = a.toByteArray(Charsets.UTF_8)
+            val bb = b.toByteArray(Charsets.UTF_8)
+            val n = minOf(ba.size, bb.size)
+            for (i in 0 until n) {
+                val x = ba[i].toInt() and 0xFF
+                val y = bb[i].toInt() and 0xFF
+                if (x != y) return@sortedWith x - y
+            }
+            ba.size - bb.size
+        }
+        val sb = StringBuilder()
+        for (key in sorted) sb.append(key).append('\t').append(prefs.getString(key, "") ?: "").append('\n')
+        val digest = java.security.MessageDigest.getInstance("SHA-256").digest(sb.toString().toByteArray(Charsets.UTF_8))
+        return digest.take(16).joinToString("") { "%02x".format(it) }
     }
 
     // ------------------------------------------------------------------ 打包导出

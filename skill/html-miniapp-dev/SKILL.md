@@ -96,3 +96,28 @@ Compress-Archive -Path * -DestinationPath ..\my-miniapp.zip
 ```
 
 产出 `my-miniapp.zip` 后告诉用户：打开小程序盒子 → 右下角「导入」选择该文件。
+
+## URL 导入（GitHub / Gitee 仓库，v1.1 新增）
+
+两端宿主（手机/电脑）都支持把仓库链接直接导入为小程序：
+
+- **单应用仓库**：仓库根目录（或某个子目录）里有 `index.html` 即可导入；
+  根目录没有时，宿主会自动扫描所有子目录，每个含 `index.html` 的子目录视为一个小程序，
+  多个时弹选择框（可全选）
+- **多应用集合仓库**：形如
+  ```
+  my-box-apps/
+  ├── todos/index.html + manifest.json
+  ├── 计算器/index.html + manifest.json
+  └── 拾词/index.html + manifest.json
+  ```
+- 每个应用目录建议带 `manifest.json`（`{"name": "显示名称"}`），没有则用目录/仓库名
+- 支持的链接：`github.com/用户/仓库`、`gitee.com/用户/仓库`（可带 `/tree/分支/子目录`）、
+  任意 `*.zip` 直链；GitHub 直连不畅时优先给 Gitee 链接
+- 产出后告诉用户：**首页右上角菜单 →「从链接导入」粘贴链接**（电脑端：＋ 导入 → 从链接导入）
+
+## 数据可移植性（v1.1 新增，重要）
+
+- 跨设备同步/迁移**只搬 `Native` 存储的数据**（打包为 `__data__/store.json`）
+- **不要用 localStorage / IndexedDB** 存用户数据：两端 origin 不同、清缓存会丢、且不参与同步
+- 正确姿势：所有需要持久化的数据（进度、设置、记录）一律 `Native.save(key, JSON.stringify(value))`

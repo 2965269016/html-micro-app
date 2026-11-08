@@ -15,6 +15,7 @@ public class StorageDialog : Form
         MinimizeBox = MaximizeBox = false;
         StartPosition = FormStartPosition.CenterParent;
         ClientSize = new Size(520, 240);
+        M3.Apply(this);
 
         var head = new Label
         {
@@ -39,11 +40,9 @@ public class StorageDialog : Form
         _storeCount.Font = new Font("Microsoft YaHei UI", 9.5f);
         _storeCount.ForeColor = Color.DimGray;
 
-        var clearBtn = new Button
+        var clearBtn = new M3Button("清空 JS 数据", M3ButtonKind.Error, 124, 36)
         {
-            Text = "清空 JS 数据",
-            Location = new Point(20, 158),
-            Size = new Size(120, 32)
+            Location = new Point(20, 154)
         };
         clearBtn.Click += (_, _) =>
         {
@@ -56,11 +55,9 @@ public class StorageDialog : Form
             ToastForm.Show(this, "JS 数据已清空");
         };
 
-        var openBtn = new Button
+        var openBtn = new M3Button("打开数据文件夹", M3ButtonKind.Tonal, 140, 36)
         {
-            Text = "打开数据文件夹",
-            Location = new Point(152, 158),
-            Size = new Size(130, 32)
+            Location = new Point(156, 154)
         };
         openBtn.Click += (_, _) =>
         {
@@ -68,11 +65,9 @@ public class StorageDialog : Form
             if (Directory.Exists(dir)) System.Diagnostics.Process.Start("explorer.exe", dir);
         };
 
-        var closeBtn = new Button
+        var closeBtn = new M3Button("关闭", M3ButtonKind.Text, 72, 36)
         {
-            Text = "关闭",
-            Location = new Point(ClientSize.Width - 104, 158),
-            Size = new Size(88, 32)
+            Location = new Point(ClientSize.Width - 92, 154)
         };
         closeBtn.Click += (_, _) => Close();
 

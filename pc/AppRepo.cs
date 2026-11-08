@@ -57,38 +57,127 @@ public static class AppRepo
 
     // ------------------------------------------------------------ 导入
 
-    /// <summary>导入一个 HTML 小程序包（zip），返回新装小程序元数据。</summary>
+    /// <summary>导入一个 HTML 小程序包（zip），返回新装小程序元数据（分配新 id）。</summary>
     public static MiniApp Import(string zipPath, string fallbackName)
     {
         string stage = Path.Combine(Path.GetTempPath(), "miniappbox_stage_" + Guid.NewGuid().ToString("N"));
         try
         {
             Unzip(zipPath, stage);
+            return ImportStage(stage, fallbackName);
+        }
+        finally
+        {
+            try { Directory.Delete(stage, true); } catch { /* 清理失败可忽略 */ }
+        }
+    }
+
+    /// <summary>把一个已解压的目录导入为小程序（URL 导入的多应用仓库用）。</summary>
+    public static MiniApp ImportDirectory(string srcDir, string fallbackName)
+    {
+        string stage = Path.Combine(Path.GetTempPath(), "miniappbox_stage_" + Guid.NewGuid().ToString("N"));
+        try
+        {
+            CopyDir(srcDir, stage);
+            return ImportStage(stage, fallbackName);
+        }
+        finally
+        {
+            try { Directory.Delete(stage, true); } catch { /* 清理失败可忽略 */ }
+        }
+    }
+
+    private static MiniApp ImportStage(string stage, string fallbackName)
+    {
+        NormalizeRoot(stage);
+        if (!File.Exists(Path.Combine(stage, "index.html")))
+            throw new ImportException("包内根目录缺少 index.html");
+
+        string dest = AllocateAppDir();
+        MoveOrCopy(stage, dest);
+
+        // 还原随包数据（如果有）
+        RestoreStore(Path.GetFileName(dest), Path.Combine(dest, DATA_DIR, "store.json"));
+
+        string name = ReadManifestName(Path.Combine(dest, "manifest.json"))
+            ?? FallbackName(fallbackName);
+        var app = new MiniApp
+        {
+            Id = Path.GetFileName(dest),
+            Name = name,
+            InstalledAt = DateTimeOffset.Now.ToUnixTimeMilliseconds()
+        };
+        SaveMeta(app);
+        return app;
+    }
+
+    /// <summary>
+    /// 同步安装：沿用发送端的 expectedId（与普通导入不同，见协议 9.3）。
+    /// id 已存在则替换 HTML 目录；store 与 meta 采用包内数据。
+    /// </summary>
+    public static MiniApp InstallSynced(string zipPath, string expectedId)
+    {
+        string stage = Path.Combine(Path.GetTempPath(), "miniappbox_sync_" + Guid.NewGuid().ToString("N"));
+        try
+        {
+            Unzip(zipPath, stage);
             NormalizeRoot(stage);
             if (!File.Exists(Path.Combine(stage, "index.html")))
-                throw new ImportException("包内根目录缺少 index.html");
+                throw new ImportException("同步包内缺少 index.html");
 
-            string dest = AllocateAppDir();
+            string dest = AppDir(expectedId);
+            Directory.CreateDirectory(AppsRoot);
+            if (Directory.Exists(dest))
+            {
+                // 旧目录先删（store_<id>.json 是独立文件，不受影响，稍后按包内数据覆盖）
+                Directory.Delete(dest, true);
+            }
             MoveOrCopy(stage, dest);
 
-            // 还原随包数据（如果有）
-            RestoreStore(Path.GetFileName(dest), Path.Combine(dest, DATA_DIR, "store.json"));
-
-            string name = ReadManifestName(Path.Combine(dest, "manifest.json"))
-                ?? FallbackName(fallbackName);
-            var app = new MiniApp
+            // meta：优先包内 __meta__/meta.json（含权限开关）
+            MiniApp app;
+            string metaSrc = Path.Combine(dest, META_DIR, "meta.json");
+            if (File.Exists(metaSrc))
             {
-                Id = Path.GetFileName(dest),
-                Name = name,
-                InstalledAt = DateTimeOffset.Now.ToUnixTimeMilliseconds()
-            };
+                app = LoadMetaFromJson(metaSrc, expectedId) ?? new MiniApp { Id = expectedId, Name = FallbackName(expectedId) };
+            }
+            else
+            {
+                app = new MiniApp
+                {
+                    Id = expectedId,
+                    Name = ReadManifestName(Path.Combine(dest, "manifest.json")) ?? FallbackName(expectedId)
+                };
+            }
+            app.Id = expectedId;
+            app.InstalledAt = app.InstalledAt > 0 ? app.InstalledAt : DateTimeOffset.Now.ToUnixTimeMilliseconds();
             SaveMeta(app);
+
+            // store 采用包内数据（同步=完整采纳发送端数据）
+            ClearData(expectedId);
+            RestoreStore(expectedId, Path.Combine(dest, DATA_DIR, "store.json"));
             return app;
         }
         finally
         {
             try { Directory.Delete(stage, true); } catch { /* 清理失败可忽略 */ }
         }
+    }
+
+    private static MiniApp LoadMetaFromJson(string metaPath, string fallbackId)
+    {
+        try
+        {
+            var json = JsonNode.Parse(File.ReadAllText(metaPath));
+            string name = json?["name"]?.ToString();
+            return new MiniApp
+            {
+                Id = json?["id"]?.ToString() ?? fallbackId,
+                Name = string.IsNullOrWhiteSpace(name) ? FallbackName(fallbackId) : name,
+                InstalledAt = json?["installedAt"]?.GetValue<long>() ?? 0L
+            };
+        }
+        catch { return null; }
     }
 
     private static string AllocateAppDir()
@@ -113,7 +202,7 @@ public static class AppRepo
         catch { CopyDir(src, dst); }
     }
 
-    private static void Unzip(string zipPath, string destDir)
+    internal static void Unzip(string zipPath, string destDir)
     {
         Directory.CreateDirectory(destDir);
         try
@@ -320,6 +409,22 @@ public static class AppRepo
         return dict;
     }
 
+    /// <summary>
+    /// JS 存储指纹（协议 9.4）：按键 UTF-8 序排序后拼 "key\tvalue\n"，SHA-256 前 16 字节 hex。
+    /// 两端（C#/Kotlin）逐字节一致，用于同步时快速判断数据是否相同。
+    /// </summary>
+    public static string StoreHash(string id)
+    {
+        // 协议 9.4 要求按 UTF-8 字节序排序（与 Kotlin 端逐字节一致，而非 UTF-16 序）
+        var entries = StoreJson(id)
+            .OrderBy(kv => kv.Key, new Utf8ByteComparer())
+            .Select(kv => kv.Key + "\t" + kv.Value + "\n");
+        byte[] payload = System.Text.Encoding.UTF8.GetBytes(string.Concat(entries));
+        using var sha = System.Security.Cryptography.SHA256.Create();
+        byte[] hash = sha.ComputeHash(payload);
+        return Convert.ToHexString(hash, 0, 16).ToLowerInvariant();
+    }
+
     private static void RestoreStore(string id, string dataFile)
     {
         if (!File.Exists(dataFile)) return;
@@ -373,5 +478,19 @@ public static class AppRepo
         using var input = File.OpenRead(srcPath);
         using var output = entry.Open();
         input.CopyTo(output);
+    }
+}
+
+/// <summary>按 UTF-8 字节序比较字符串（协议 9.4 storeHash 的两端一致排序）。</summary>
+internal sealed class Utf8ByteComparer : System.Collections.Generic.IComparer<string>
+{
+    public int Compare(string? x, string? y)
+    {
+        byte[] bx = System.Text.Encoding.UTF8.GetBytes(x ?? "");
+        byte[] by = System.Text.Encoding.UTF8.GetBytes(y ?? "");
+        int n = Math.Min(bx.Length, by.Length);
+        for (int i = 0; i < n; i++)
+            if (bx[i] != by[i]) return bx[i] - by[i];
+        return bx.Length - by.Length;
     }
 }

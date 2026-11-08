@@ -22,6 +22,7 @@ public class PermissionDialog : Form
         MinimizeBox = MaximizeBox = false;
         StartPosition = FormStartPosition.CenterParent;
         ClientSize = new Size(520, 288);
+        M3.Apply(this);
 
         var head = new Label
         {
@@ -58,11 +59,9 @@ public class PermissionDialog : Form
         };
         Controls.Add(hint);
 
-        var save = new Button
+        var save = new M3Button("保存", M3ButtonKind.Filled, 96, 34)
         {
-            Text = "保存",
-            Location = new Point(ClientSize.Width - 200, ClientSize.Height - 40),
-            Size = new Size(88, 30)
+            Location = new Point(ClientSize.Width - 212, ClientSize.Height - 44)
         };
         save.Click += (_, _) =>
         {
@@ -70,11 +69,9 @@ public class PermissionDialog : Form
                 AppRepo.SetPermission(app.Id, key, _boxes[key].Checked);
             Close();
         };
-        var cancel = new Button
+        var cancel = new M3Button("取消", M3ButtonKind.Text, 72, 34)
         {
-            Text = "取消",
-            Location = new Point(ClientSize.Width - 104, ClientSize.Height - 40),
-            Size = new Size(88, 30)
+            Location = new Point(ClientSize.Width - 108, ClientSize.Height - 44)
         };
         cancel.Click += (_, _) => Close();
         Controls.Add(save);

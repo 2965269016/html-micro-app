@@ -8,14 +8,14 @@
     <Nullable>disable</Nullable>
     <AssemblyName>MiniAppBox</AssemblyName>
     <RootNamespace>MiniAppBox</RootNamespace>
-    <Version>0.1.0</Version>
-    <FileVersion>0.1.0.0</FileVersion>
-    <InformationalVersion>0.1.0</InformationalVersion>
+    <Version>0.2.0</Version>
+    <FileVersion>0.2.0.0</FileVersion>
+    <InformationalVersion>0.2.0</InformationalVersion>
     <Product>小程序盒子 PC 版</Product>
     <InvariantGlobalization>true</InvariantGlobalization>
     <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
-    <NoWarn>$(NoWarn);MSB3277</NoWarn>
+    <NoWarn>$(NoWarn);MSB3277;CS8632</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

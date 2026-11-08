@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_import_url"
+        android:title="从链接导入"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_sync"
+        android:title="设备同步"
+        app:showAsAction="never" />
+</menu>

@@ -111,3 +111,25 @@ HTML 地理定位 API                // 定位      【需权限: 定位】 宿�
 | 构建链 | Kotlin 1.9.21 · AGP 8.2.2 · Gradle 8.4 · JDK 17 |
 | UI | Material Design 3 (material 1.11.0) |
 | 关键依赖 | androidx.webkit 1.9.0（WebViewAssetLoader）、appcompat 1.6.1、core-ktx 1.12.0 |
+
+---
+
+## v1.1 新能力（2026-11-08，两端 0.2.0）
+
+### 从链接导入（GitHub / Gitee）
+
+- 入口：手机端 首页右上角菜单「从链接导入」；电脑端 ＋导入 → 从链接导入（或 `--import-url`）
+- 支持仓库链接（自动探测默认分支）、`/tree/分支/子目录`、`.zip` 直链
+- 单应用 = 仓库根（或某个子目录）有 index.html；多应用仓库自动识别并弹选择框
+
+### 设备同步（局域网 IPv4 + IPv6）
+
+- 入口：手机端 首页右上角菜单「设备同步」；电脑端 首页「同步」按钮（托盘常驻可后台接收）
+- 自动发现（UDP 广播/多播）+ 手动 IP；连接后逐应用对比（storeHash 指纹）
+- 每个应用可选 推送给对方 / 从对方获取 / 跳过，或一键"时间新者胜"；同步携带 JS 数据、保 id
+- 协议细节：PROTOCOL.md 第 8/9 节；安卓监听仅同步页存活期间运行
+
+### Material Design 3 美化
+
+- 手机端：Material You 动态取色（Android 12+）、Surface 状态栏
+- 电脑端：M3 Baseline 配色自绘主题（药丸按钮 / 圆角卡片 / Surface 层级）

@@ -3,11 +3,13 @@
 「网页小程序」宿主，HTML 小程序包（zip）随时导入，导入即出现在列表里，点开就用 ——
 就像微信里的小程序，但盒子是你自己的。**加小程序永远不需要重新构建安装包。**
 
-- **手机端**：Kotlin + Material Design 3（Android）· 版本 **0.1.2**
+- **手机端**：Kotlin + Material Design 3（Android 12+ 支持 Material You 动态取色）· 版本 **0.2.0**
   包名 `com.example.htmlmicroapp` · minSdk 24 / targetSdk 34
-- **电脑端**：C# / .NET 10 + WinForms + WebView2（Windows 10/11 x64）· 版本 **0.1.0**，源码在 [`pc/`](pc/)
-- 两端共用同一份[《小程序互通协议》](PROTOCOL.md)：**同一个 zip 小程序包在手机和电脑上都能导入运行**，
-  数据随包迁移；外壳均为纯原生 UI，小程序内容由系统 WebView 渲染
+- **电脑端**：C# / .NET 10 + WinForms + WebView2（Windows 10/11 x64，M3 自绘主题）· 版本 **0.2.0**，源码在 [`pc/`](pc/)
+- 两端共用同一份[《小程序互通协议》](PROTOCOL.md)（v1.1）：**同一个 zip 小程序包在手机和电脑上都能导入运行**；
+  支持从 GitHub / Gitee 仓库链接直接导入；**局域网设备同步**（IPv4+IPv6，应用连同数据双向迁移，
+  可逐项选方向或一键"时间新者胜"）；电脑端关闭窗口缩到托盘后台常驻
+- 外壳均为纯原生 UI，小程序内容由系统 WebView 渲染
 
 ---
 
@@ -77,12 +79,15 @@ html_app_src/            内置示例小程序源码（pack_html.sh 打包进 as
 ```bash
 cd pc
 dotnet publish -c Release -r win-x64 --self-contained true \
-  -o ../小程序盒子-PC     # 自包含（.NET 运行库已打包，拷到任何 Win10/11 x64 都能跑）
+  -o publish/sc   # 自包含（.NET 运行库已打包，拷到任何 Win10/11 x64 都能跑）
 ```
 
-- 数据目录：`%LOCALAPPDATA%\MiniAppBox`（每个小程序独立隔离）
-- 手机端导出的 zip 在电脑端「＋ 导入小程序」直接选择即可，应用+数据+权限一并还原
-- 电脑端导出的 zip 同样可以导回手机端（数据还原；权限开关暂不还原，见协议文档）
+- 数据目录：`%LOCALAPPDATA%\MiniAppBox`（每个小程序独立隔离，settings.json 存设备名/同步开关）
+- **后台常驻**：关闭窗口缩到托盘，托盘菜单 打开/同步/允许同步/退出
+- **导入**：＋ 导入 → 本地 zip / 从 GitHub·Gitee 链接导入；命令行 `--import 包.zip`、`--import-url 链接`
+- **设备同步**：首页「同步」→ 自动发现或手动 IP → 逐项选方向或一键"时间新者胜"
+  （手机端在「设备同步」页期间可被连接；协议细节见 PROTOCOL.md 第 9 节）
+- 手机端导出的 zip 直接导入即可，应用+数据+权限一并还原；电脑端导出的同样可导回手机端
 
 ## 云构建
 

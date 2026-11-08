@@ -124,7 +124,66 @@ public static class SelfTest
         bool noEscape = !File.Exists(Path.Combine(AppRepo.AppsRoot, "escape.txt"));
         Check("zip-slip 路径被跳过", noEscape || slip != null, "逃逸文件出现在目录外!");
 
-        // 10. 清理
+        // 11. URL 解析（纯字符串，无网络）
+        var g1 = UrlImporter.Parse("https://github.com/foo/bar");
+        Check("github 链接解析", g1 != null && g1.Kind == "github" && g1.User == "foo" && g1.Repo == "bar" && g1.Branch == "");
+        var g2 = UrlImporter.Parse("http://github.com/foo/bar/tree/dev/webapp/");
+        Check("github tree 分支+子目录解析", g2 != null && g2.Branch == "dev" && g2.SubPath == "webapp");
+        var g3 = UrlImporter.Parse("https://gitee.com/u/r.git");
+        Check("gitee 链接解析（.git 后缀剥离）", g3 != null && g3.Kind == "gitee" && g3.Repo == "r");
+        var g4 = UrlImporter.Parse("https://example.com/app/dist/app.zip?token=x");
+        Check("zip 直链解析", g4 != null && g4.Kind == "zip" && g4.ZipUrl.Contains("app.zip"));
+        Check("无关链接返回 null", UrlImporter.Parse("https://example.com/hello") == null);
+
+        // 12. storeHash（协议 9.4：与键序无关，与内容有关）
+        bridge.Clear(); // 先清掉第 7 节遗留的测试数据
+        bridge.Save("b", "2");
+        bridge.Save("a", "1");
+        string hashA = AppRepo.StoreHash(app.Id);
+        bridge.Clear();
+        bridge.Save("a", "1");
+        bridge.Save("b", "2");
+        Check("storeHash 与写入顺序无关", AppRepo.StoreHash(app.Id) == hashA,
+            $"h1={hashA} h2={AppRepo.StoreHash(app.Id)} 键={string.Join(",", AppRepo.StoreJson(app.Id).Keys)}");
+        bridge.Save("a", "改");
+        Check("storeHash 随内容变化", AppRepo.StoreHash(app.Id) != hashA);
+
+        // 13. 保 id 安装（同步路径，协议 9.3）
+        string syncedId = "app_synced_selftest";
+        var synced = AppRepo.InstallSynced(exportZip, syncedId);
+        Check("InstallSynced 沿用指定 id", synced.Id == syncedId && Directory.Exists(AppRepo.AppDir(syncedId)));
+        Check("InstallSynced 名称来自 __meta__", synced.Name == "自检小程序", synced.Name);
+        Check("InstallSynced 采纳包内 store 数据",
+            AppRepo.StoreJson(syncedId).TryGetValue("进度", out string pv) && pv == "42");
+        string indexBefore = File.ReadAllText(Path.Combine(AppRepo.AppDir(syncedId), "index.html"));
+        AppRepo.InstallSynced(exportZip, syncedId);
+        Check("InstallSynced 重复安装=替换不报错", File.Exists(Path.Combine(AppRepo.AppDir(syncedId), "index.html")));
+
+        // 14. 回环同步（真实 HTTP：Server + Client 本机互通，IPv4-mapped 走双栈监听）
+        Environment.SetEnvironmentVariable("MINIAPPBOX_SYNC_PORT", "48777");
+        var serverSettings = new AppSettings { DeviceName = "自检机" };
+        using (var server = new SyncServer(serverSettings))
+        {
+            string hashBefore = AppRepo.StoreHash(syncedId);
+            server.Start();
+            Thread.Sleep(300);
+            var info = SyncClient.GetInfo("127.0.0.1", 48777);
+            Check("GET /sync/info 返回设备与应用", info.Device == "自检机"
+                && info.Apps.Any(a => a.Id == syncedId));
+            Check("info 里 storeHash 与本地一致",
+                info.Apps.FirstOrDefault(a => a.Id == syncedId)?.StoreHash == hashBefore);
+            byte[] pulled = SyncClient.GetApp("127.0.0.1", 48777, syncedId);
+            Check("GET /sync/app 拉到 zip", pulled.Length > 100 && pulled[0] == 'P' && pulled[1] == 'K');
+            AppRepo.Delete(syncedId);
+            Check("删除后 info 不再包含", !SyncClient.GetInfo("127.0.0.1", 48777).Apps.Any(a => a.Id == syncedId));
+            SyncClient.PushApp("127.0.0.1", 48777, syncedId, pulled);
+            Check("POST /sync/app 推送=保 id 重建",
+                Directory.Exists(AppRepo.AppDir(syncedId)) && AppRepo.StoreHash(syncedId) == hashBefore);
+            server.Stop();
+        }
+        Environment.SetEnvironmentVariable("MINIAPPBOX_SYNC_PORT", null);
+
+        // 15. 清理
         AppRepo.Delete(app.Id);
         AppRepo.Delete(app2.Id);
         Check("删除后目录与存储一并清除", !Directory.Exists(AppRepo.AppDir(app.Id)) && !File.Exists(AppRepo.StoreFile(app.Id)));

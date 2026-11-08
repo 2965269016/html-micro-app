@@ -49,12 +49,22 @@ class HomeActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // 动态取色（Material You，Android 12+ 随壁纸变色）
+        com.google.android.material.color.DynamicColors.applyToActivityIfAvailable(this)
         setContentView(R.layout.activity_home)
 
         rootView = findViewById(R.id.home_root)
         emptyState = findViewById(R.id.empty_state)
         val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
         toolbar.title = getString(R.string.app_name)
+        toolbar.inflateMenu(R.menu.menu_home)
+        toolbar.setOnMenuItemClickListener { item ->
+            when (item.itemId) {
+                R.id.action_import_url -> { showUrlImportDialog(); true }
+                R.id.action_sync -> { startActivity(android.content.Intent(this, SyncActivity::class.java)); true }
+                else -> false
+            }
+        }
 
         adapter = AppsAdapter(
             onOpen = { app -> runApp(app) },
@@ -121,6 +131,112 @@ class HomeActivity : AppCompatActivity() {
         } catch (e: Exception) {
             Snackbar.make(rootView, "内置示例载入失败", Snackbar.LENGTH_SHORT).show()
         }
+    }
+
+    // ------------------------------------------------------------ 从链接导入（GitHub / Gitee / zip 直链）
+
+    private fun showUrlImportDialog() {
+        val input = android.widget.EditText(this).apply {
+            hint = "https://github.com/用户/仓库 或 https://gitee.com/用户/仓库"
+            setSingleLine(true)
+            setPadding(48, 32, 48, 8)
+        }
+        MaterialAlertDialogBuilder(this)
+            .setTitle("从链接导入小程序")
+            .setMessage("支持 GitHub / Gitee 仓库链接（可含 /tree/分支/子目录）和 .zip 直链。")
+            .setView(input)
+            .setPositiveButton("导入") { _, _ ->
+                val url = input.text.toString().trim()
+                if (url.isNotEmpty()) importFromUrl(url)
+            }
+            .setNegativeButton("取消", null)
+            .show()
+    }
+
+    private fun importFromUrl(url: String) {
+        val repo = UrlImporter.parse(url)
+        if (repo == null) {
+            MaterialAlertDialogBuilder(this)
+                .setTitle("无法识别的链接")
+                .setMessage("支持：github.com/用户/仓库、gitee.com/用户/仓库（可带 /tree/分支/子目录），或 .zip 直链。")
+                .setPositiveButton("知道了", null)
+                .show()
+            return
+        }
+        val progress = MaterialAlertDialogBuilder(this)
+            .setTitle("从链接导入")
+            .setMessage("解析仓库分支…")
+            .setCancelable(false)
+            .show()
+        Thread {
+            var stageDir: java.io.File? = null
+            try {
+                val zip = java.io.File(cacheDir, "url_${System.currentTimeMillis()}.zip")
+                val downloaded = try {
+                    UrlImporter.downloadAndFindRoots(repo, zip)
+                } finally {
+                    zip.delete()
+                }
+                stageDir = downloaded.second
+                val roots = downloaded.first
+                val names = roots.map { readRootName(it, repo.displayName) }
+
+                val imported = mutableListOf<String>()
+                if (roots.size == 1) {
+                    imported += AppRepo.importDirectory(this, roots[0], repo.displayName).name
+                } else {
+                    // 多应用仓库：主线程弹多选框，选完再逐个导入
+                    val checked = BooleanArray(roots.size) { true }
+                    val latch = java.util.concurrent.CountDownLatch(1)
+                    var picked: List<Int> = emptyList()
+                    runOnUiThread {
+                        MaterialAlertDialogBuilder(this)
+                            .setTitle("仓库里有 ${roots.size} 个小程序")
+                            .setMultiChoiceItems(names.toTypedArray(), checked) { _, which, isChecked ->
+                                checked[which] = isChecked
+                            }
+                            .setPositiveButton("导入所选") { _, _ ->
+                                picked = checked.indices.filter { checked[it] }
+                                latch.countDown()
+                            }
+                            .setNegativeButton("取消") { _, _ -> latch.countDown() }
+                            .setOnCancelListener { latch.countDown() }
+                            .show()
+                    }
+                    latch.await()
+                    for (i in picked) {
+                        imported += AppRepo.importDirectory(this, roots[i], repo.displayName).name
+                    }
+                }
+                runOnUiThread {
+                    reload()
+                    Snackbar.make(rootView, "已导入 ${imported.size} 个：${imported.joinToString("、")}", Snackbar.LENGTH_LONG).show()
+                    progress.dismiss()
+                }
+            } catch (e: Exception) {
+                runOnUiThread {
+                    progress.dismiss()
+                    MaterialAlertDialogBuilder(this)
+                        .setTitle("导入失败")
+                        .setMessage(e.message ?: "未知错误")
+                        .setPositiveButton("知道了", null)
+                        .show()
+                }
+            } finally {
+                stageDir?.deleteRecursively()
+            }
+        }.start()
+    }
+
+    private fun readRootName(root: java.io.File, fallback: String): String {
+        val manifest = java.io.File(root, "manifest.json")
+        if (manifest.isFile) {
+            try {
+                val name = org.json.JSONObject(manifest.readText()).optString("name")
+                if (name.isNotBlank()) return name
+            } catch (_: Exception) { }
+        }
+        return root.name.ifBlank { fallback }
     }
 
     private fun queryDisplayName(uri: android.net.Uri): String? = try {

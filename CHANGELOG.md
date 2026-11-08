@@ -2,6 +2,48 @@
 
 所有显著变更记录在本文件。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)。
 
+## [0.2.0] - 2026-11-08（手机端 0.2.0 / versionCode 5 · 电脑端 PC 0.2.0）
+
+两端同版发布：M3 美化 + 后台常驻 + 链接导入 + 设备同步。互通协议升 **v1.1**（新增第 8/9 节）。
+
+### 新增（两端共有）
+
+- **从 GitHub / Gitee 链接导入小程序**：支持 `用户/仓库`（自动探测默认分支）、
+  `/tree/分支/子目录` 与 `.zip` 直链；仓库根没有 index.html 时自动扫描子目录，
+  多应用仓库弹选择框可全选（协议第 8 节）
+- **设备同步（局域网 · IPv4 + IPv6）**：UDP 广播/多播自动发现 + 手动 IP 兜底，
+  HTTP 双栈传输（IPv6 `::` DualMode）；连接后列出应用差异，逐项选方向
+  （推送/拉取/跳过）或一键"时间新者胜"；同步携带 JS 数据、保 id 安装
+  （协议第 9 节；storeHash 两端逐字节一致的指纹算法）
+- **Material Design 3 美化**：手机端接入 Material You 动态取色（Android 12+ 随壁纸变色）、
+  状态栏 Surface 化；电脑端全新自绘 M3 主题（Baseline 配色、药丸按钮、圆角卡片列表）
+
+### 手机端
+
+- 补上 **INTERNET / ACCESS_NETWORK_STATE / CHANGE_WIFI_MULTICAST_STATE** 权限
+  （此前 WebView 外链与本次新功能都依赖它）
+- 新增 `UrlImporter.kt` / `SyncEngine.kt`（服务+发现+客户端）/ `SyncActivity.kt`；
+  `AppRepo` 增加 `importDirectory` / `installSynced` / `storeHash`
+- 同步监听仅在同步页存活期间运行（按用户选择不做安卓常驻服务），页面保持屏幕常亮
+- 首页右上角菜单：从链接导入 / 设备同步
+
+### 电脑端（PC）
+
+- **托盘后台常驻**：关闭窗口缩到托盘，同步服务随托盘运行（可关），
+  托盘菜单 打开/同步/允许同步/退出
+- 新增 `MaterialTheme.cs` / `UrlImporter.cs` / `UrlImportDialog.cs` /
+  `SyncServer.cs` / `SyncClient.cs` / `Discovery.cs` / `SyncDialog.cs` / `AppSettings.cs`
+- 首页改 M3 自绘卡片列表，「＋ 导入」下拉三种导入方式；命令行新增 `--import-url`
+- 自检扩至 **46 项断言**全通过（新增 URL 解析 / storeHash / 保 id 安装 /
+  真实 HTTP 回环同步）；GUI 自动化实测：M3 观感、直链导入、
+  双实例同步（发现→连接→一键→数据迁移）、托盘常驻全通过
+- 实现注记：WebView2 `AddHostObjectToScript` 同步封送在本环境返回 0x80070057 不可靠，
+  桥继续沿用 0.1.0 的"同步 XHR + WebResourceRequested"方案（详见 RunForm 注释）
+
+### 修复
+
+- 差异对比行缺失对方应用信息导致"数据不同"项自动方向判定崩溃、拉取方向静默失效（PC SyncDialog）
+
 ## [PC 0.1.0] - 2026-11-08
 
 第一个 Windows 电脑端版本（源码在 [`pc/`](pc/)，C# / .NET 10 WinForms + WebView2）。
