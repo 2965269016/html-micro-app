@@ -98,7 +98,7 @@ class SyncEngine(
                 val group = InetAddress.getByName("ff02::1")
                 for (nic in NetworkInterface.getNetworkInterfaces()) {
                     if (!nic.isUp) continue
-                    try { socket.joinGroup(InetSocketAddress(group, nic)) } catch (_: Exception) { }
+                    try { socket.joinGroup(InetSocketAddress(group, UDP_PORT), nic) } catch (_: Exception) { }
                 }
             } catch (_: Exception) { }
             socket.broadcast = true
@@ -195,7 +195,7 @@ class SyncEngine(
                     val id = params["id"]
                     val app = id?.let { AppRepo.loadMeta(context, it) }
                     if (id == null || app == null) {
-                        respond(c, 404, "application/json; charset=utf-8", failJson("not_found"))
+                        respond(c, 404, "application/json; charset=utf-8", failJson("not_found").toByteArray(Charsets.UTF_8))
                         return
                     }
                     val bytes = exportZip(id)
@@ -204,7 +204,7 @@ class SyncEngine(
                 } else if (method == "POST" && path == "/sync/app") {
                     val id = params["id"]
                     if (id == null || body == null || body.isEmpty()) {
-                        respond(c, 400, "application/json; charset=utf-8", failJson("bad_request"))
+                        respond(c, 400, "application/json; charset=utf-8", failJson("bad_request").toByteArray(Charsets.UTF_8))
                         return
                     }
                     val tmp = File(context.cacheDir, "recv_${System.currentTimeMillis()}.zip")
@@ -215,12 +215,12 @@ class SyncEngine(
                         emit("已从对方接收「${app.name}」")
                         onAppsChanged?.invoke()
                     } catch (e: Exception) {
-                        respond(c, 400, "application/json; charset=utf-8", failJson(e.message ?: "install_failed"))
+                        respond(c, 400, "application/json; charset=utf-8", failJson(e.message ?: "install_failed").toByteArray(Charsets.UTF_8))
                     } finally {
                         tmp.delete()
                     }
                 } else {
-                    respond(c, 404, "application/json; charset=utf-8", failJson("not_found"))
+                    respond(c, 404, "application/json; charset=utf-8", failJson("not_found").toByteArray(Charsets.UTF_8))
                 }
             }
         } catch (_: Exception) { }
