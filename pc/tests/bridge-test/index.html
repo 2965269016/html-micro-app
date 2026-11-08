@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Native 桥自检</title>
+<style>
+  body { font-family: sans-serif; padding: 12px; max-width: 640px; margin: 0 auto; }
+  button { display: block; width: 100%; margin: 6px 0; padding: 9px; font-size: 15px; }
+  pre { background: #f4f4f4; padding: 8px; font-size: 12px; white-space: pre-wrap; word-break: break-all; max-height: 220px; overflow: auto; }
+  h3 { margin: 8px 0 2px; }
+</style>
+</head>
+<body>
+<h3>Native 桥自检（电脑端 / 手机端通用）</h3>
+<pre id="log">点击下方按钮逐项测试：</pre>
+<script>
+function log(t) { var p = document.getElementById('log'); p.textContent = t + "\n----\n" + p.textContent; }
+function run(name, fn) { try { log(name + " → " + fn()); } catch (e) { log(name + " → JS异常: " + e.message); } }
+function p(j) { try { return JSON.stringify(JSON.parse(j)); } catch (e) { return "(非法JSON: " + j + ")"; } }
+</script>
+<button onclick="run('save', function(){return p(Native.save('test_key','你好-'+Date.now()))})">save（存一个值）</button>
+<button onclick="run('load', function(){return p(Native.load('test_key'))})">load（读回）</button>
+<button onclick="run('keys', function(){return p(Native.keys())})">keys</button>
+<button onclick="run('remove', function(){return p(Native.remove('test_key'))})">remove</button>
+<button onclick="run('clear', function(){return p(Native.clear())})">clear</button>
+<button onclick="run('toast', function(){return p(Native.toast('来自小程序的提示'))})">toast（应弹出底部提示）</button>
+<button onclick="run('notify·需权限', function(){return p(Native.notify('测试通知','这是通知正文'))})">notify（需通知权限）</button>
+<button onclick="run('vibrate·需权限', function(){return p(Native.vibrate(800))})">vibrate（需振动权限，电脑端=窗口闪烁）</button>
+<button onclick="run('copy·需权限', function(){return p(Native.copyText('复制的文本-'+Date.now()))})">copyText（需剪贴板权限）</button>
+<button onclick="run('paste·需权限', function(){return p(Native.pasteText())})">pasteText（需剪贴板权限）</button>
+<button onclick="run('share', function(){return p(Native.share('标题','分享的内容'))})">share（电脑端=复制+提示）</button>
+<button onclick="run('deviceInfo', function(){return p(Native.deviceInfo())})">deviceInfo</button>
+<button onclick="run('LocalStore别名', function(){return p(LocalStore.save('alias','ok'))})">LocalStore 别名兼容</button>
+<button onclick="run('load(null)', function(){return p(Native.load(null))})">load(null) → key_required</button>
+</body>
+</html>

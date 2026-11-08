@@ -1,12 +1,13 @@
 # 小程序盒子（HTML MicroApp Box）
 
-用 Kotlin + Material Design 3 写的「网页小程序」宿主 App：HTML 小程序包（zip）随时导入，
-导入即出现在列表里，点开就用 —— 就像微信里的小程序，但盒子是你自己的。
-**加小程序永远不需要重新构建 APK。**
+「网页小程序」宿主，HTML 小程序包（zip）随时导入，导入即出现在列表里，点开就用 ——
+就像微信里的小程序，但盒子是你自己的。**加小程序永远不需要重新构建安装包。**
 
-- 版本：**0.1.0**（[更新日志](CHANGELOG.md) · [功能日志](FEATURES.md)）
-- 包名：`com.example.htmlmicroapp` · minSdk 24 / targetSdk 34
-- 外壳：纯原生 Material Design 3（不用 WebView）；小程序内容：系统 WebView 渲染
+- **手机端**：Kotlin + Material Design 3（Android）· 版本 **0.1.2**
+  包名 `com.example.htmlmicroapp` · minSdk 24 / targetSdk 34
+- **电脑端**：C# / .NET 10 + WinForms + WebView2（Windows 10/11 x64）· 版本 **0.1.0**，源码在 [`pc/`](pc/)
+- 两端共用同一份[《小程序互通协议》](PROTOCOL.md)：**同一个 zip 小程序包在手机和电脑上都能导入运行**，
+  数据随包迁移；外壳均为纯原生 UI，小程序内容由系统 WebView 渲染
 
 ---
 
@@ -59,10 +60,29 @@ app/src/main/java/com/example/htmlmicroapp/
 ├── AppRepo.kt           数据层：导入/列表/删除/权限/存储/打包
 ├── MiniAppBridge.kt     JS 桥接：Native（LocalStore 别名）
 └── IconGenerator.kt     首字 + 配色动态图标
+pc/                      电脑端（Windows，.NET 10 WinForms + WebView2）
+├── HomeForm.cs          首页（列表/导入/右键管理）
+├── RunForm.cs           运行时（WebView2 虚拟域名映射 + 定位门控）
+├── AppRepo.cs           数据层（与手机端同构）
+├── MiniAppBridge.cs     JS 桥接（同步语义与手机端一致）
+└── SelfTest.cs          --selftest 仓库层自检
+PROTOCOL.md              手机端/电脑端互通协议 v1（改接口先改这里）
 skill/html-miniapp-dev/  ZCode skill（AI 按此规范写小程序）
 html_app_src/            内置示例小程序源码（pack_html.sh 打包进 assets）
 .github/workflows/       GitHub Actions 云构建 + Release
 ```
+
+## 电脑端（Windows）
+
+```bash
+cd pc
+dotnet publish -c Release -r win-x64 --self-contained true \
+  -o ../小程序盒子-PC     # 自包含（.NET 运行库已打包，拷到任何 Win10/11 x64 都能跑）
+```
+
+- 数据目录：`%LOCALAPPDATA%\MiniAppBox`（每个小程序独立隔离）
+- 手机端导出的 zip 在电脑端「＋ 导入小程序」直接选择即可，应用+数据+权限一并还原
+- 电脑端导出的 zip 同样可以导回手机端（数据还原；权限开关暂不还原，见协议文档）
 
 ## 云构建
 

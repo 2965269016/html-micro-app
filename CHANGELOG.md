@@ -2,6 +2,33 @@
 
 所有显著变更记录在本文件。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)。
 
+## [PC 0.1.0] - 2026-11-08
+
+第一个 Windows 电脑端版本（源码在 [`pc/`](pc/)，C# / .NET 10 WinForms + WebView2）。
+
+### 新增（电脑端）
+
+- **与手机端 1:1 的容器设计**：本地处理（完全离线可用）、按小程序隔离的容器目录、
+  四项权限引擎（通知/振动/剪贴板/定位，实时生效）——设计思路与 Android 端一致
+- **互通协议 v1**（新增 [PROTOCOL.md](PROTOCOL.md)）：包格式、桥 API、权限模型、迁移格式的两端共同契约
+- **同一个 zip 双端通用**：手机端导出的包在电脑端导入后应用+数据+权限全部还原；
+  电脑端导出的包可导回手机端（数据还原）
+- JS 桥 `Native`（别名 `LocalStore`）：13 个方法与手机端同签名、同返回 JSON、同错误码；
+  经 WebView2 `AddHostObjectToScript` + 文档创建注入实现**同步**调用，现有小程序零改动
+- 首页卡片列表 + 右键菜单（打开/权限管理/存储管理/导出/删除）＋「＋ 导入小程序」
+- 动态图标与手机端同算法同调色板（Java `String.hashCode` 哈希），同名小程序两端同色
+- `--selftest` 仓库层自检命令（30 项断言：导入/存储/权限/导出/zip-slip/迁移还原）
+
+### 平台差异（语义等价，详见协议文档第 5 节）
+
+- `vibrate` → 任务栏图标闪烁；`share` → 复制到剪贴板 + toast；`notify` → 托盘气泡（恒返回 ok）
+
+### 构建
+
+```bash
+cd pc && dotnet publish -c Release -r win-x64 --self-contained true
+```
+
 ## [0.1.2] - 2026-11-07
 
 ### 变更
