@@ -45,10 +45,11 @@ class RunActivity : AppCompatActivity() {
         }
         val id = appId!!
 
-        // 悬浮返回键：网页有历史则后退，否则退出小程序
+        // 悬浮胶囊：左上=网页后退（无历史则退出）；右上=直接退出回盒子
         findViewById<ImageButton>(R.id.btn_back).setOnClickListener {
             if (this::webView.isInitialized && webView.canGoBack()) webView.goBack() else finish()
         }
+        findViewById<ImageButton>(R.id.btn_exit).setOnClickListener { finish() }
 
         webView = findViewById(R.id.webview)
         setupWebView(id)
@@ -74,6 +75,16 @@ class RunActivity : AppCompatActivity() {
             .build()
 
         webView.webViewClient = object : WebViewClient() {
+            override fun onPageStarted(
+                view: WebView,
+                url: String,
+                favicon: android.graphics.Bitmap?
+            ) {
+                // 把悬浮胶囊的安全区告知网页，供其自动避让（协议见 html-miniapp-dev skill）
+                view.evaluateJavascript(INJECT_SAFE_AREA, null)
+                super.onPageStarted(view, url, favicon)
+            }
+
             override fun shouldInterceptRequest(
                 view: WebView,
                 request: WebResourceRequest
@@ -193,6 +204,15 @@ class RunActivity : AppCompatActivity() {
             <h2>页面加载失败</h2><p>该小程序包可能已损坏（缺少 index.html），
             请回到盒子删除后重新导入。</p></body></html>
         """
+
+        /**
+         * 悬浮胶囊安全区（dp）：左上返回 44dp + 边距 10dp ≈ 56。
+         * 网页用 CSS 变量 --box-safe-top 避让，或读 window.__miniapp_safe_insets。
+         */
+        private const val INJECT_SAFE_AREA =
+            "window.__miniapp_safe_insets={top:56,left:56,right:56,bottom:0};" +
+                "document.documentElement.style.setProperty('--box-safe-top','56px');" +
+                "document.documentElement.style.setProperty('--box-safe-side','56px');"
 
         /** 供桌面快捷方式 / 盒子列表构造启动 Intent。 */
         fun intentFor(activity: Context, appId: String, appName: String): Intent =

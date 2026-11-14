@@ -9,17 +9,38 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <!-- 微信小程序式悬浮返回键：不占布局空间，盖在网页内容上 -->
-    <ImageButton
-        android:id="@+id/btn_back"
-        android:layout_width="44dp"
-        android:layout_height="44dp"
-        android:layout_gravity="top|start"
-        android:layout_marginStart="10dp"
-        android:layout_marginTop="10dp"
-        android:background="@drawable/bg_floating_button"
-        android:contentDescription="@string/back"
-        android:src="@drawable/ic_back"
-        android:scaleType="center" />
+    <!-- 微信小程序式悬浮胶囊：左上返回 / 右上退出，盖在网页内容上 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top"
+        android:orientation="horizontal"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:paddingTop="10dp">
+
+        <ImageButton
+            android:id="@+id/btn_back"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:background="@drawable/bg_floating_button"
+            android:contentDescription="@string/back"
+            android:src="@drawable/ic_back"
+            android:scaleType="center" />
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+
+        <ImageButton
+            android:id="@+id/btn_exit"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:background="@drawable/bg_floating_button"
+            android:contentDescription="@string/exit"
+            android:src="@drawable/ic_close"
+            android:scaleType="center" />
+    </LinearLayout>
 
 </FrameLayout>

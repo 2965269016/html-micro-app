@@ -18,7 +18,7 @@ struct RunView: View {
     @State private var filePicker: FilePickerPackage?
 
     var body: some View {
-        ZStack(alignment: .topLeading) {
+        ZStack(alignment: .top) {
             WebViewContainer(
                 app: app,
                 canGoBack: $canGoBack,
@@ -27,21 +27,35 @@ struct RunView: View {
             )
             .ignoresSafeArea(.container, edges: .bottom)
 
-            // 悬浮返回键
-            Button {
-                if canGoBack {
-                    WebViewContainer.host?.goBack()
-                } else {
-                    dismiss()
+            // 悬浮胶囊：左上返回 / 右上退出
+            HStack(spacing: 0) {
+                Button {
+                    if canGoBack {
+                        WebViewContainer.host?.goBack()
+                    } else {
+                        dismiss()
+                    }
+                } label: {
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .frame(width: 40, height: 40)
+                        .background(.black.opacity(0.4), in: Circle())
                 }
-            } label: {
-                Image(systemName: "chevron.left")
-                    .font(.system(size: 17, weight: .semibold))
-                    .foregroundStyle(.white)
-                    .frame(width: 40, height: 40)
-                    .background(.black.opacity(0.4), in: Circle())
+
+                Spacer(minLength: 0)
+
+                Button {
+                    dismiss()
+                } label: {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .frame(width: 40, height: 40)
+                        .background(.black.opacity(0.4), in: Circle())
+                }
             }
-            .padding(.leading, 10)
+            .padding(.horizontal, 10)
             .padding(.top, 6)
         }
         .navigationBarBackButtonHidden(true)

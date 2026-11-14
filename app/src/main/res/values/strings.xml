@@ -10,4 +10,5 @@
     <string name="perm_clipboard">剪贴板</string>
     <string name="perm_geolocation">定位</string>
     <string name="back">返回</string>
+    <string name="exit">退出</string>
 </resources>

@@ -82,7 +82,10 @@ if (!r.ok) alert("失败：" + r.error);   // "permission_denied" = 权限未开
 ## 交互规范
 
 - 手机竖屏优先；`<meta viewport>` 必须带，按上面模板写
-- 小程序运行在带原生顶栏的 WebView 里，**不要**自己再做返回按钮，历史导航宿主已处理
+- 运行时顶部有悬浮胶囊（手机端：**左上=返回 / 右上=退出**；电脑端无），盖在网页内容上。
+  顶部重要内容必须避让：CSS 用 `padding-top: var(--box-safe-top, 0px)`，
+  或 JS 读 `window.__miniapp_safe_insets`（手机端为 {top:56,left:56,right:56}；电脑端未注入，CSS 默认 0px）
+- **不要**自己做返回/退出按钮，胶囊已处理（左上历史后退、右上退出）
 - 弹窗用 `Native.toast()` / `Native.notify()`，不要用 alert()（部分 WebView 上体验差）
 - 输出 zip 时确保 index.html 在 zip 根（不要把整个文件夹拖进去多套一层）
 

@@ -2,6 +2,18 @@
 
 所有显著变更记录在本文件。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)。
 
+## [0.2.1] - 2026-11-14（手机端 0.2.1 / versionCode 6 · iOS 端 0.1.1）
+
+### 变更（运行页悬浮胶囊 + 网页避让，Android / iOS 同步）
+
+- 悬浮胶囊改为**双键**：**左上=返回**（网页历史后退，无历史退出）、**右上=退出**（直接回盒子）
+- 网页自动避让胶囊：运行时向页面注入安全区 ——
+  CSS 变量 `--box-safe-top` / `--box-safe-side`（56px），JS 常量
+  `window.__miniapp_safe_insets = {top:56,left:56,right:56,bottom:0}`；
+  内置示例头部已改为自动避让
+- `html-miniapp-dev` skill 交互规范同步更新（避让写法 + 双键说明）
+- iOS：CFBundleShortVersionString 0.1.1；macos-14 云构建镜像已退役 → 改用 macos-latest
+
 ## [iOS 0.1.0] - 2026-11-14
 
 ### 新增（iOS 端，协议 v1.1 第 1~7 节）

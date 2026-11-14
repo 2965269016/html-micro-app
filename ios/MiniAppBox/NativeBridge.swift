@@ -63,6 +63,11 @@ enum BridgeInjection {
             navigator.geolocation.watchPosition = function(){ return 0; };
             navigator.geolocation.clearWatch = function(){};
           }
+
+          // 悬浮胶囊安全区（左上返回 / 右上退出），供网页避让
+          window.__miniapp_safe_insets = {top: 56, left: 56, right: 56, bottom: 0};
+          document.documentElement.style.setProperty('--box-safe-top', '56px');
+          document.documentElement.style.setProperty('--box-safe-side', '56px');
         })();
         """
         return WKUserScript(source: js, injectionTime: .atDocumentStart, forMainFrameOnly: false)
