@@ -46,9 +46,11 @@ jobs:
 
       - name: Package Payload zip
         run: |
-          ls -la build/Build/Products/Release-iphoneos/
+          APP_PATH=$(find build -type d -name "MiniAppBox.app" | head -1)
+          echo "APP: $APP_PATH"
+          [ -n "$APP_PATH" ] || { find build -maxdepth 4 -type d | head -30; exit 1; }
           mkdir Payload
-          cp -R "build/Build/Products/Release-iphoneos/MiniAppBox.app" Payload/
+          cp -R "$APP_PATH" Payload/
           zip -qry "MiniAppBox-0.1.1-unsigned.zip" Payload
           ls -la MiniAppBox-0.1.1-unsigned.zip
 
