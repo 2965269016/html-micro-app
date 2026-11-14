@@ -6,8 +6,10 @@
 - **手机端**：Kotlin + Material Design 3（Android 12+ 支持 Material You 动态取色）· 版本 **0.2.0**
   包名 `com.example.htmlmicroapp` · minSdk 24 / targetSdk 34
 - **电脑端**：C# / .NET 10 + WinForms + WebView2（Windows 10/11 x64，M3 自绘主题）· 版本 **0.2.0**，源码在 [`pc/`](pc/)
-- 两端共用同一份[《小程序互通协议》](PROTOCOL.md)（v1.1）：**同一个 zip 小程序包在手机和电脑上都能导入运行**；
-  支持从 GitHub / Gitee 仓库链接直接导入；**局域网设备同步**（IPv4+IPv6，应用连同数据双向迁移，
+- **iOS 端**：SwiftUI + WKWebView（iOS 16+）· 版本 **0.1.0**，源码在 [`ios/`](ios/)，
+  实现协议第 1~7 节（URL 导入/设备同步暂未实现）；云端未签名包 + Windows 侧载安装见 [ios/README.md](ios/README.md)
+- 各端共用同一份[《小程序互通协议》](PROTOCOL.md)（v1.1）：**同一个 zip 小程序包在各端都能导入运行**；
+  支持从 GitHub / Gitee 仓库链接直接导入（Android/PC）；**局域网设备同步**（IPv4+IPv6，应用连同数据双向迁移，
   可逐项选方向或一键"时间新者胜"）；电脑端关闭窗口缩到托盘后台常驻
 - 外壳均为纯原生 UI，小程序内容由系统 WebView 渲染
 
@@ -68,7 +70,10 @@ pc/                      电脑端（Windows，.NET 10 WinForms + WebView2）
 ├── AppRepo.cs           数据层（与手机端同构）
 ├── MiniAppBridge.cs     JS 桥接（同步语义与手机端一致）
 └── SelfTest.cs          --selftest 仓库层自检
-PROTOCOL.md              手机端/电脑端互通协议 v1（改接口先改这里）
+ios/                     iOS 端（SwiftUI + WKWebView，iOS 16+）
+├── MiniAppBox.xcodeproj 手写工程文件
+└── MiniAppBox/*.swift   首页/运行时/数据层/同步 JS 桥/纯 Swift zip 读写
+PROTOCOL.md              各端互通协议 v1.1（改接口先改这里）
 skill/html-miniapp-dev/  ZCode skill（AI 按此规范写小程序）
 html_app_src/            内置示例小程序源码（pack_html.sh 打包进 assets）
 .github/workflows/       GitHub Actions 云构建 + Release
@@ -91,9 +96,12 @@ dotnet publish -c Release -r win-x64 --self-contained true \
 
 ## 云构建
 
-push 到 main 自动触发 GitHub Actions 构建，APK 发布到
-[Releases](https://github.com/2965269016/html-micro-app/releases)。
-Gitee（lujunbo2008/html-micro-app）为代码镜像。
+push 到 main 自动触发 GitHub Actions：
+
+- **Android**：`build.yml` → `app-debug.apk` 发布到 [Releases](https://github.com/2965269016/html-micro-app/releases)
+- **iOS**：`ios-build.yml`（macOS runner）→ 未签名 `MiniAppBox-x.x.x-unsigned.zip`，
+  用 Sideloadly 侧载安装（[步骤](ios/README.md)）
+- Gitee（lujunbo2008/html-micro-app）为代码镜像。
 
 ## 本地开发
 

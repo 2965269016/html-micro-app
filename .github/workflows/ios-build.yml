@@ -1,0 +1,79 @@
+name: Build iOS
+
+# iOS 版小程序盒子：macOS 云构建（无需本地 Mac）
+# 产物：未签名 Payload zip —— 用 Sideloadly / AltStore + 免费 Apple ID 侧载安装
+# 详见 ios/README.md
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'ios/**'
+      - '.github/workflows/ios-build.yml'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-14
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 先跑模拟器构建，快速暴露 Swift 编译错误
+      - name: Compile check (iphonesimulator)
+        run: |
+          xcodebuild -project ios/MiniAppBox.xcodeproj \
+            -target MiniAppBox \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            CODE_SIGNING_ALLOWED=NO \
+            build | tail -30
+
+      # 真机（未签名）构建 → Payload zip，可被 Sideloadly 签名安装
+      - name: Build unsigned device app
+        run: |
+          xcodebuild -project ios/MiniAppBox.xcodeproj \
+            -target MiniAppBox \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            SYMROOT=build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGN_IDENTITY="" \
+            build | tail -30
+
+      - name: Package Payload zip
+        run: |
+          ls -la build/Build/Products/Release-iphoneos/
+          mkdir Payload
+          cp -R "build/Build/Products/Release-iphoneos/MiniAppBox.app" Payload/
+          zip -qry "MiniAppBox-0.1.0-unsigned.zip" Payload
+          ls -la MiniAppBox-0.1.0-unsigned.zip
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MiniAppBox-ios-unsigned
+          path: MiniAppBox-0.1.0-unsigned.zip
+          retention-days: 30
+
+      - name: Publish to Release
+        if: github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ios-build-0.1.0
+          name: iOS 版小程序盒子 0.1.0（未签名，需侧载）
+          body: |
+            iOS 版小程序盒子（SwiftUI + WKWebView，功能与 Android 版对齐）。
+
+            ## ⚠️ 安装须知
+            iOS 无法像 APK 直接安装。本包**未签名**，需用你自己的 Apple ID 签名侧载：
+            1. Windows 电脑下载 [Sideloadly](https://sideloadly.io)
+            2. 数据线连接 iPhone，导入本 zip（或解压后选 Payload/MiniAppBox.app）
+            3. 填入 Apple ID → Start（免费证书 7 天有效，到期重签）
+            详细步骤见仓库 ios/README.md
+          files: MiniAppBox-0.1.0-unsigned.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

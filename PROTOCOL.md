@@ -1,11 +1,12 @@
 # 小程序互通协议 v1.1
 
-**这是手机端（Android）与电脑端（Windows）宿主共同实现的规范。**
+**这是手机端（Android）、电脑端（Windows）与 iOS 端宿主共同实现的规范。**
 任何一端改包格式、桥 API 或权限模型，必须先改本文档并同步两端实现（"电脑端跟手机端同步更新"的契约就在这里）。
 
 - 协议版本：**v1.1**（v1：2026-11-08 定稿；v1.1：2026-11-08 新增 URL 导入与设备同步）
 - 手机端实现：`app/src/main/java/com/example/htmlmicroapp/`（Kotlin）
 - 电脑端实现：`pc/`（C# / .NET 10 WinForms + WebView2）
+- iOS 端实现：`ios/`（SwiftUI + WKWebView，实现第 1~7 节；第 8/9 节 URL 导入与设备同步暂未实现，v1.2 候选）
 - 小程序包本身是**跨端中立**的：同一个 zip 在两端都能导入运行
 
 ---
@@ -71,17 +72,17 @@ __data__/store.json               {"key":"value",...} 该小程序全部 JS 数�
 
 ## 5. 平台差异（v1 允许的呈现差异，语义等价）
 
-| 能力 | Android | Windows PC |
-|---|---|---|
-| `notify` 呈现 | 通知栏通知 | 托盘气泡通知（Windows 通知中心）；无法可靠探测系统总开关，**恒返回 `{ok:true}`** |
-| `vibrate` | 真实振动 | **任务栏图标闪烁** ms 毫秒（无振动硬件） |
-| `share` | 系统分享面板 | **复制文本到剪贴板 + toast 提示**（Windows 无统一分享面板） |
-| `toast` | Android Toast | 底部浮现深色提示条，约 2 秒淡出 |
-| `deviceInfo` 字段值 | 如 `model=Pixel` | `model="PC"`、`brand="MiniAppBox-PC"`、`osVersion="Windows 10.0.26300"` |
-| 新窗口 / target=_blank | 不打开（默认） | 在同一窗口内导航 |
-| 文件选择 | 系统选择器 | WebView2 内置打开文件对话框 |
+| 能力 | Android | Windows PC | iOS |
+|---|---|---|---|
+| `notify` 呈现 | 通知栏通知 | 托盘气泡通知（Windows 通知中心）；无法可靠探测系统总开关，**恒返回 `{ok:true}`** | 通知中心通知；可探测系统总开关，关闭时返回 `system_notification_disabled` |
+| `vibrate` | 真实振动 | **任务栏图标闪烁** ms 毫秒（无振动硬件） | 触觉反馈脉冲（按 ms 映射轻重档，无时长概念） |
+| `share` | 系统分享面板 | **复制文本到剪贴板 + toast 提示**（Windows 无统一分享面板） | 系统分享面板（UIActivityViewController，同 Android） |
+| `toast` | Android Toast | 底部浮现深色提示条，约 2 秒淡出 | 居中短提示（UIAlertController，需点「好」关闭） |
+| `deviceInfo` 字段值 | 如 `model=Pixel` | `model="PC"`、`brand="MiniAppBox-PC"`、`osVersion="Windows 10.0.26300"` | `model="iPhone"`、`brand="Apple"`、`osVersion="iOS 17.x"` |
+| 新窗口 / target=_blank | 不打开（默认） | 在同一窗口内导航 | 不打开（默认，同 Android） |
+| 文件选择 | 系统选择器 | WebView2 内置打开文件对话框 | UIDocumentPicker 系统选择器 |
 
-除上表外，两端行为必须一致；新增差异先改本文档。
+除上表外，各端行为必须一致；新增差异先改本文档。
 
 ## 6. 图标
 

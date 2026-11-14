@@ -2,6 +2,31 @@
 
 所有显著变更记录在本文件。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)。
 
+## [iOS 0.1.0] - 2026-11-14
+
+### 新增（iOS 端，协议 v1.1 第 1~7 节）
+
+- **完整 Xcode 工程**（`ios/`）：SwiftUI + iOS 16+，零第三方依赖，包格式 / JS 桥 /
+  权限模型与 Android·PC 完全对齐 —— **同一个 zip 包三端通用**
+  - 首页列表 / fileImporter 导入 / 内置示例 / 长按管理菜单（权限/存储/导出/删除）
+  - WKWebView 运行时：`box://<id>/` 自定义 scheme 映射本地目录（等价 WebViewAssetLoader）
+  - **同步 JS 桥**：`nativebridge://` scheme + 同步 XHR 垫片，`Native.*` 12 个 API
+    同步返回 JSON（与 Android @JavascriptInterface 同语义），参数宽松转换
+  - 每小程序独立权限（通知/振动/剪贴板/定位 CLLocationManager 垫片）
+  - 纯 Swift `ZipArchive`（Apple Compression + CRC32），迁移格式互导
+  - 悬浮返回键、`<input type=file>` 系统选择器、应用+数据打包分享导出
+  - 「添加到桌面」等价物：动态 Quick Actions（长按 App 图标直达，最多 4 个）
+  - 图标哈希按协议第 6 节对齐 Java `String.hashCode()`（同名三端同色）
+- **macOS 云构建**（`.github/workflows/ios-build.yml`）：模拟器编译检查 +
+  真机未签名构建 → `MiniAppBox-0.1.0-unsigned.zip` 发布到 Release
+- **侧载指南**（`ios/README.md`）：Windows + Sideloadly + 免费 Apple ID 安装步骤
+- 协议文档：PROTOCOL.md 增加 iOS 实现声明与平台差异表（第 5 节）
+
+### 已知范围（iOS 0.1.0）
+
+- 第 8/9 节（URL 导入、设备同步）暂未实现，v1.2 候选
+- `toast` 用系统短提示呈现（见协议第 5 节差异表）；`vibrate` 映射触觉反馈轻重档
+
 ## [0.2.0] - 2026-11-08（手机端 0.2.0 / versionCode 5 · 电脑端 PC 0.2.0）
 
 两端同版发布：M3 美化 + 后台常驻 + 链接导入 + 设备同步。互通协议升 **v1.1**（新增第 8/9 节）。

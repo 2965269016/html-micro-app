@@ -1,0 +1,282 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		B00000000000000000000001 /* MiniAppBoxApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000001 /* MiniAppBoxApp.swift */; };
+		B00000000000000000000002 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000002 /* HomeView.swift */; };
+		B00000000000000000000003 /* RunView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000003 /* RunView.swift */; };
+		B00000000000000000000004 /* MiniAppStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000004 /* MiniAppStore.swift */; };
+		B00000000000000000000005 /* NativeBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000005 /* NativeBridge.swift */; };
+		B00000000000000000000006 /* ZipArchive.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000006 /* ZipArchive.swift */; };
+		B00000000000000000000007 /* IconGen.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000007 /* IconGen.swift */; };
+		B00000000000000000000008 /* Sheets.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000008 /* Sheets.swift */; };
+		B00000000000000000000011 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000011 /* Assets.xcassets */; };
+		B00000000000000000000012 /* demo.zip in Resources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000012 /* demo.zip */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		F00000000000000000000001 /* MiniAppBoxApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiniAppBoxApp.swift; sourceTree = "<group>"; };
+		F00000000000000000000002 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		F00000000000000000000003 /* RunView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunView.swift; sourceTree = "<group>"; };
+		F00000000000000000000004 /* MiniAppStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiniAppStore.swift; sourceTree = "<group>"; };
+		F00000000000000000000005 /* NativeBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeBridge.swift; sourceTree = "<group>"; };
+		F00000000000000000000006 /* ZipArchive.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZipArchive.swift; sourceTree = "<group>"; };
+		F00000000000000000000007 /* IconGen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconGen.swift; sourceTree = "<group>"; };
+		F00000000000000000000008 /* Sheets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sheets.swift; sourceTree = "<group>"; };
+		F00000000000000000000010 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		F00000000000000000000011 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		F00000000000000000000012 /* demo.zip */ = {isa = PBXFileReference; lastKnownFileType = archive.zip; path = demo.zip; sourceTree = "<group>"; };
+		F00000000000000000000020 /* MiniAppBox.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MiniAppBox.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		P00000000000000000000003 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		G00000000000000000000001 = {
+			isa = PBXGroup;
+			children = (
+				G00000000000000000000002 /* MiniAppBox */,
+				G00000000000000000000003 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		G00000000000000000000002 /* MiniAppBox */ = {
+			isa = PBXGroup;
+			children = (
+				F00000000000000000000001 /* MiniAppBoxApp.swift */,
+				F00000000000000000000002 /* HomeView.swift */,
+				F00000000000000000000003 /* RunView.swift */,
+				F00000000000000000000004 /* MiniAppStore.swift */,
+				F00000000000000000000005 /* NativeBridge.swift */,
+				F00000000000000000000006 /* ZipArchive.swift */,
+				F00000000000000000000007 /* IconGen.swift */,
+				F00000000000000000000008 /* Sheets.swift */,
+				F00000000000000000000011 /* Assets.xcassets */,
+				F00000000000000000000012 /* demo.zip */,
+				F00000000000000000000010 /* Info.plist */,
+			);
+			path = MiniAppBox;
+			sourceTree = "<group>";
+		};
+		G00000000000000000000003 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F00000000000000000000020 /* MiniAppBox.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		T00000000000000000000001 /* MiniAppBox */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C00000000000000000000002 /* Build configuration list for PBXNativeTarget "MiniAppBox" */;
+			buildPhases = (
+				P00000000000000000000001 /* Sources */,
+				P00000000000000000000003 /* Frameworks */,
+				P00000000000000000000002 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = MiniAppBox;
+			productName = MiniAppBox;
+			productReference = F00000000000000000000020 /* MiniAppBox.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		1A0000000000000000000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					T00000000000000000000001 = {
+						CreatedOnToolsVersion = 15.0;
+					};
+				};
+			};
+			buildConfigurationList = C00000000000000000000001 /* Build configuration list for PBXProject "MiniAppBox" */;
+			developmentRegion = zh_CN;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				zh_CN,
+				Base,
+			);
+			mainGroup = G00000000000000000000001;
+			productRefGroup = G00000000000000000000003 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				T00000000000000000000001 /* MiniAppBox */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		P00000000000000000000002 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B00000000000000000000011 /* Assets.xcassets in Resources */,
+				B00000000000000000000012 /* demo.zip in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		P00000000000000000000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B00000000000000000000001 /* MiniAppBoxApp.swift in Sources */,
+				B00000000000000000000002 /* HomeView.swift in Sources */,
+				B00000000000000000000003 /* RunView.swift in Sources */,
+				B00000000000000000000004 /* MiniAppStore.swift in Sources */,
+				B00000000000000000000005 /* NativeBridge.swift in Sources */,
+				B00000000000000000000006 /* ZipArchive.swift in Sources */,
+				B00000000000000000000007 /* IconGen.swift in Sources */,
+				B00000000000000000000008 /* Sheets.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		D00000000000000000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		D00000000000000000000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_VERSION = 5.0;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		D00000000000000000000003 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = MiniAppBox/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.htmlmicroapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		D00000000000000000000004 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = MiniAppBox/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.htmlmicroapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		C00000000000000000000001 /* Build configuration list for PBXProject "MiniAppBox" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D00000000000000000000001 /* Debug */,
+				D00000000000000000000002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C00000000000000000000002 /* Build configuration list for PBXNativeTarget "MiniAppBox" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D00000000000000000000003 /* Debug */,
+				D00000000000000000000004 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 1A0000000000000000000001 /* Project object */;
+}
