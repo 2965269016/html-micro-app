@@ -98,38 +98,34 @@ final class MiniAppStore: ObservableObject {
         return importData(data, fallbackName: fallbackName)
     }
 
-    /// 从内存导入（内置示例）。
+    /// 从内存导入（内置示例 / 文件选择器 / URL 导入共用）。
+    /// subdir 非空时只导入该子目录（URL 导入 /tree/分支/子目录 用）。
     @discardableResult
-    func importData(_ data: Data, fallbackName: String) throws -> MiniApp {
-        let entries = try ZipArchive.read(data: data)
-
-        // 单顶层目录剥壳（与 Android normalizeRoot 一致）
-        var items = entries
-        let hasRootIndex = items.contains { $0.path == "index.html" }
-        if !hasRootIndex {
-            let topDirs = Set(items.compactMap { $0.path.split(separator: "/").first.map(String.init) })
-            let topFiles = items.filter { !$0.path.contains("/") }
-            if topDirs.count == 1 && topFiles.isEmpty {
-                let prefix = topDirs.first! + "/"
-                items = items.map { e in
-                    e.path.hasPrefix(prefix)
-                        ? ZipEntryData(path: String(e.path.dropFirst(prefix.count)), data: e.data)
-                        : e
-                }
+    func importData(_ data: Data, fallbackName: String, subdir: String = "") throws -> MiniApp {
+        var entries = try ZipArchive.read(data: data)
+        if !subdir.isEmpty {
+            let prefix = subdir + "/"
+            entries = entries.compactMap { e in
+                e.path.hasPrefix(prefix)
+                    ? ZipEntryData(path: String(e.path.dropFirst(prefix.count)), data: e.data) : nil
             }
         }
-
-        guard items.contains(where: { $0.path == "index.html" }) else {
+        try normalizeSingleRoot(&entries)
+        guard entries.contains(where: { $0.path == "index.html" }) else {
             throw MiniAppError.missingIndex
         }
+        return try importEntries(entries, fallbackName: fallbackName)
+    }
 
+    /// 核心写入：把一批已就位的条目落盘为一个小程序（URL 多应用导入也走这里）。
+    @discardableResult
+    func importEntries(_ entries: [ZipEntryData], fallbackName: String) throws -> MiniApp {
         let id = "app_" + Self.timestamp()
         let dest = Self.appDir(id)
         try FileManager.default.createDirectory(at: dest, withIntermediateDirectories: true)
 
         var manifestName: String?
-        for entry in items {
-            // 跳过宿主保留目录
+        for entry in entries {
             if entry.path.hasPrefix(Self.dataDirName + "/") || entry.path == "meta.json" {
                 if entry.path == Self.dataDirName + "/store.json" {
                     Self.restoreStore(id: id, json: entry.data)
@@ -157,6 +153,20 @@ final class MiniAppStore: ObservableObject {
         saveMeta(app)
         reload()
         return app
+    }
+
+    /// 若只有一个顶层目录且根级无 index.html，把该目录内容上移一层（协议第 1 节）。
+    private func normalizeSingleRoot(_ entries: inout [ZipEntryData]) {
+        guard !entries.contains(where: { $0.path == "index.html" }) else { return }
+        let topDirs = Set(entries.compactMap { $0.path.split(separator: "/").first.map(String.init) })
+        let topFiles = entries.filter { !$0.path.contains("/") }
+        if topDirs.count == 1 && topFiles.isEmpty {
+            let prefix = topDirs.first! + "/"
+            entries = entries.map { e in
+                e.path.hasPrefix(prefix)
+                    ? ZipEntryData(path: String(e.path.dropFirst(prefix.count)), data: e.data) : e
+            }
+        }
     }
 
     /// 载入随 App 内置的示例包。

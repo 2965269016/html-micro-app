@@ -2,6 +2,18 @@
 
 所有显著变更记录在本文件。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)。
 
+## [iOS 0.1.2] - 2026-11-14
+
+### 新增（协议第 8 节：URL 导入）
+
+- **从 GitHub / Gitee 仓库链接直接导入**：首页右上角「+」菜单 → 从链接导入
+  - 支持 `github.com/用户/仓库`、`gitee.com/用户/仓库`（可带 `/tree/分支/子目录`）、`.zip` 直链
+  - 默认分支：API 查询（4s 超时）→ main/master 探测（Gitee 为 master/main，HEAD+Range 探测）
+  - 单应用仓库整仓导入；多应用仓库自动扫描子目录（深度 ≤3，跳过点目录/保留目录），
+    弹多选框逐项或全选导入；名称取包内 manifest.json 否则目录/仓库名
+- `MiniAppStore` 重构：`importEntries` 核心写入 + `importData(subdir:)` 子目录导入，
+  文件/示例/URL 三路导入共用同一落盘路径
+
 ## [0.2.1] - 2026-11-14（手机端 0.2.1 / versionCode 6 · iOS 端 0.1.1）
 
 ### 变更（运行页悬浮胶囊 + 网页避让，Android / iOS 同步）

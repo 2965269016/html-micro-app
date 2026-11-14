@@ -102,7 +102,7 @@ Compress-Archive -Path * -DestinationPath ..\my-miniapp.zip
 
 ## URL 导入（GitHub / Gitee 仓库，v1.1 新增）
 
-两端宿主（手机/电脑）都支持把仓库链接直接导入为小程序：
+三端宿主（手机/电脑/iOS，iOS 0.1.2 起）都支持把仓库链接直接导入为小程序：
 
 - **单应用仓库**：仓库根目录（或某个子目录）里有 `index.html` 即可导入；
   根目录没有时，宿主会自动扫描所有子目录，每个含 `index.html` 的子目录视为一个小程序，

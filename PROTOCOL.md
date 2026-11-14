@@ -6,7 +6,7 @@
 - 协议版本：**v1.1**（v1：2026-11-08 定稿；v1.1：2026-11-08 新增 URL 导入与设备同步）
 - 手机端实现：`app/src/main/java/com/example/htmlmicroapp/`（Kotlin）
 - 电脑端实现：`pc/`（C# / .NET 10 WinForms + WebView2）
-- iOS 端实现：`ios/`（SwiftUI + WKWebView，实现第 1~7 节；第 8/9 节 URL 导入与设备同步暂未实现，v1.2 候选）
+- iOS 端实现：`ios/`（SwiftUI + WKWebView，实现第 1~8 节；第 9 节设备同步暂未实现，v1.2 候选）
 - 小程序包本身是**跨端中立**的：同一个 zip 在两端都能导入运行
 
 ---
@@ -99,7 +99,7 @@ __data__/store.json               {"key":"value",...} 该小程序全部 JS 数�
 
 ## 8. URL 导入（v1.1 新增）
 
-两端宿主都支持把 GitHub / Gitee 仓库链接直接导入为小程序：
+各端宿主（手机 / 电脑 / iOS）都支持把 GitHub / Gitee 仓库链接直接导入为小程序：
 
 | 支持的链接 | 解析 |
 |---|---|

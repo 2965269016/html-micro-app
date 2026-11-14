@@ -22,6 +22,12 @@ struct HomeView: View {
     @State private var exportShare: SharePackage?
     @State private var deleteTarget: MiniApp?
     @State private var importError: String?
+    @State private var showUrlInput = false
+    @State private var urlText = ""
+    @State private var importing = false
+    @State private var repoPackage: RepoImportPackage?
+    @State private var showBadUrl = false
+    @State private var importSummary: String?
 
     var body: some View {
         NavigationStack {
@@ -35,15 +41,45 @@ struct HomeView: View {
             .navigationTitle("小程序盒子")
             .toolbar {
                 ToolbarItemGroup(placement: .topBarTrailing) {
-                    Button {
-                        showImporter = true
+                    Menu {
+                        Button {
+                            showImporter = true
+                        } label: {
+                            Label("导入 zip 包", systemImage: "square.and.arrow.down")
+                        }
+                        Button {
+                            showUrlInput = true
+                        } label: {
+                            Label("从链接导入", systemImage: "link")
+                        }
+                        Divider()
+                        Button {
+                            loadDemo()
+                        } label: {
+                            Label("载入内置示例", systemImage: "sparkles")
+                        }
                     } label: {
-                        Label("导入 HTML 包", systemImage: "square.and.arrow.down")
+                        Label("导入", systemImage: "plus.circle.fill")
                     }
                 }
             }
         }
         .environmentObject(appState)
+        .overlay {
+            if importing {
+                ZStack {
+                    Color.black.opacity(0.25).ignoresSafeArea()
+                    VStack(spacing: 12) {
+                        ProgressView()
+                        Text("解析仓库分支…")
+                            .font(.footnote)
+                            .foregroundStyle(.white)
+                    }
+                    .padding(20)
+                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 14))
+                }
+            }
+        }
         .fileImporter(isPresented: $showImporter,
                       allowedContentTypes: [.zip, .data],
                       allowsMultipleSelection: false) { result in
@@ -53,6 +89,21 @@ struct HomeView: View {
                 doImport(url)
             case .failure(let error):
                 importError = error.localizedDescription
+            }
+        }
+        .alert("从链接导入小程序", isPresented: $showUrlInput) {
+            TextField("https://github.com/用户/仓库", text: $urlText)
+            Button("导入") {
+                let url = urlText.trimmingCharacters(in: .whitespacesAndNewlines)
+                if !url.isEmpty { importFromURL(url) }
+            }
+            Button("取消", role: .cancel) {}
+        } message: {
+            Text("支持 GitHub / Gitee 仓库链接（可含 /tree/分支/子目录）和 .zip 直链。")
+        }
+        .sheet(item: $repoPackage) { pkg in
+            MultiImportSheet(package: pkg) { selected in
+                importCandidates(selected, fallback: pkg.fallbackName)
             }
         }
         .sheet(item: $permTarget) { app in
@@ -71,6 +122,22 @@ struct HomeView: View {
             Button("知道了", role: .cancel) {}
         } message: {
             Text(importError ?? "")
+        }
+        .alert("无法识别的链接", isPresented: Binding(
+            get: { showBadUrl && importError == nil },
+            set: { showBadUrl = $0 }
+        )) {
+            Button("知道了", role: .cancel) {}
+        } message: {
+            Text("支持：github.com/用户/仓库、gitee.com/用户/仓库（可带 /tree/分支/子目录），或 .zip 直链。")
+        }
+        .alert("导入完成", isPresented: Binding(
+            get: { importSummary != nil },
+            set: { if !$0 { importSummary = nil } }
+        )) {
+            Button("好", role: .cancel) {}
+        } message: {
+            Text(importSummary ?? "")
         }
         .alert("删除小程序", isPresented: Binding(
             get: { deleteTarget != nil },
@@ -176,6 +243,57 @@ struct HomeView: View {
         }
     }
 
+    // ------------------------------------------------------------ 从链接导入（GitHub / Gitee / zip 直链）
+
+    private func importFromURL(_ url: String) {
+        guard let repo = UrlImporter.parse(url) else {
+            showBadUrl = true
+            return
+        }
+        importing = true
+        Task {
+            do {
+                let zipURL = try await UrlImporter.resolveZipURL(repo)
+                let data = try await UrlImporter.download(zipURL)
+                let entries = try ZipArchive.read(data: data)
+                let candidates = try UrlImporter.candidates(in: entries, subPath: repo.subPath)
+                await MainActor.run {
+                    importing = false
+                    if candidates.count == 1 {
+                        importCandidates([candidates[0]], fallback: repo.displayName)
+                    } else {
+                        repoPackage = RepoImportPackage(
+                            candidates: candidates, fallbackName: repo.displayName
+                        )
+                    }
+                }
+            } catch {
+                await MainActor.run {
+                    importing = false
+                    importError = error.localizedDescription
+                }
+            }
+        }
+    }
+
+    private func importCandidates(_ candidates: [RepoCandidate], fallback: String) {
+        var imported: [String] = []
+        do {
+            for c in candidates {
+                let app = try store.importEntries(c.entries, fallbackName: fallback)
+                imported.append(app.name)
+            }
+            QuickActions.sync(apps: store.apps)
+        } catch {
+            importError = error.localizedDescription
+            return
+        }
+        // 轻反馈：复用错误弹层不合适，用列表头部刷新即可；多个时给出摘要
+        if imported.count > 1 {
+            importSummary = "已导入 \(imported.count) 个：\(imported.joined(separator: "、"))"
+        }
+    }
+
     private func exportApp(_ app: MiniApp) {
         do {
             let data = try MiniAppStore.exportPackage(app)
@@ -247,5 +365,70 @@ enum QuickActions {
     static func appId(from item: UIApplicationShortcutItem) -> String? {
         guard item.type.hasPrefix("open_") else { return nil }
         return item.userInfo?["id"] as? String
+    }
+}
+
+// ==================================================================== 多应用仓库选择
+
+/// 多应用仓库（URL 导入扫描出多个含 index.html 的目录）的选择与导入
+struct RepoImportPackage: Identifiable {
+    let id = UUID()
+    let candidates: [RepoCandidate]
+    let fallbackName: String
+}
+
+struct MultiImportSheet: View {
+
+    let package: RepoImportPackage
+    let onImport: ([RepoCandidate]) -> Void
+
+    @Environment(\.dismiss) private var dismiss
+    @State private var selected: Set<String> = []
+
+    var body: some View {
+        NavigationStack {
+            List(package.candidates) { c in
+                Button {
+                    if selected.contains(c.id) {
+                        selected.remove(c.id)
+                    } else {
+                        selected.insert(c.id)
+                    }
+                } label: {
+                    HStack(spacing: 12) {
+                        Image(systemName: selected.contains(c.id)
+                              ? "checkmark.circle.fill" : "circle")
+                            .foregroundStyle(selected.contains(c.id)
+                                             ? Color.accentColor : .secondary)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(c.suggestedName)
+                                .font(.body)
+                                .foregroundStyle(.primary)
+                            Text(c.path.isEmpty ? "(仓库根)" : c.path)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                }
+                .buttonStyle(.plain)
+            }
+            .listStyle(.insetGrouped)
+            .navigationTitle("发现 \(package.candidates.count) 个小程序")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("取消") { dismiss() }
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("导入所选 (\(selected.count))") {
+                        let picked = package.candidates.filter { selected.contains($0.id) }
+                        dismiss()
+                        if !picked.isEmpty { onImport(picked) }
+                    }
+                }
+            }
+        }
+        .onAppear { selected = Set(package.candidates.map(\.id)) }
+        .interactiveDismissDisabled()
     }
 }

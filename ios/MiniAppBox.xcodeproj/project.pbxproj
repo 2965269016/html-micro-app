@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B00000000000000000000009 /* UrlImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000009 /* UrlImporter.swift */; };
 		B00000000000000000000001 /* MiniAppBoxApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000001 /* MiniAppBoxApp.swift */; };
 		B00000000000000000000002 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000002 /* HomeView.swift */; };
 		B00000000000000000000003 /* RunView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000003 /* RunView.swift */; };
@@ -28,6 +29,7 @@
 		F00000000000000000000006 /* ZipArchive.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZipArchive.swift; sourceTree = "<group>"; };
 		F00000000000000000000007 /* IconGen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconGen.swift; sourceTree = "<group>"; };
 		F00000000000000000000008 /* Sheets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sheets.swift; sourceTree = "<group>"; };
+		F00000000000000000000009 /* UrlImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UrlImporter.swift; sourceTree = "<group>"; };
 		F00000000000000000000010 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F00000000000000000000011 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		F00000000000000000000012 /* demo.zip */ = {isa = PBXFileReference; lastKnownFileType = archive.zip; path = demo.zip; sourceTree = "<group>"; };
@@ -64,6 +66,7 @@
 				F00000000000000000000006 /* ZipArchive.swift */,
 				F00000000000000000000007 /* IconGen.swift */,
 				F00000000000000000000008 /* Sheets.swift */,
+				F00000000000000000000009 /* UrlImporter.swift */,
 				F00000000000000000000011 /* Assets.xcassets */,
 				F00000000000000000000012 /* demo.zip */,
 				F00000000000000000000010 /* Info.plist */,
@@ -156,6 +159,7 @@
 				B00000000000000000000006 /* ZipArchive.swift in Sources */,
 				B00000000000000000000007 /* IconGen.swift in Sources */,
 				B00000000000000000000008 /* Sheets.swift in Sources */,
+				B00000000000000000000009 /* UrlImporter.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -213,7 +217,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
@@ -223,7 +227,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.1.1;
+				MARKETING_VERSION = 0.1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.example.htmlmicroapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
@@ -237,7 +241,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
@@ -247,7 +251,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.1.1;
+				MARKETING_VERSION = 0.1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.example.htmlmicroapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;

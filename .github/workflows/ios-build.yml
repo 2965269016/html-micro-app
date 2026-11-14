@@ -53,22 +53,22 @@ jobs:
           [ -n "$APP_PATH" ] || { find build -maxdepth 4 -type d | head -30; exit 1; }
           mkdir Payload
           cp -R "$APP_PATH" Payload/
-          zip -qry "MiniAppBox-0.1.1-unsigned.zip" Payload
-          ls -la MiniAppBox-0.1.1-unsigned.zip
+          zip -qry "MiniAppBox-0.1.2-unsigned.zip" Payload
+          ls -la MiniAppBox-0.1.2-unsigned.zip
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: MiniAppBox-ios-unsigned
-          path: MiniAppBox-0.1.1-unsigned.zip
+          path: MiniAppBox-0.1.2-unsigned.zip
           retention-days: 30
 
       - name: Publish to Release
         if: github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ios-build-0.1.1
-          name: iOS 版小程序盒子 0.1.1（未签名，需侧载）
+          tag_name: ios-build-0.1.2
+          name: iOS 版小程序盒子 0.1.2（未签名，需侧载）
           body: |
             iOS 版小程序盒子（SwiftUI + WKWebView，功能与 Android 版对齐）。
 
@@ -78,6 +78,6 @@ jobs:
             2. 数据线连接 iPhone，导入本 zip（或解压后选 Payload/MiniAppBox.app）
             3. 填入 Apple ID → Start（免费证书 7 天有效，到期重签）
             详细步骤见仓库 ios/README.md
-          files: MiniAppBox-0.1.1-unsigned.zip
+          files: MiniAppBox-0.1.2-unsigned.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
